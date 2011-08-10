@@ -8,11 +8,29 @@
 
 #import "GUIController.h"
 #import "SkypeClientAppDelegate.h"
-#import "Singleton.h"
+#import "Global.h"
 
 @implementation GUIController
 
 //@synthesize currentConvo;
+
+- (void)dataUpdated {
+    NSLog(@"NEW DATA: %@",[[Global _settings] convo]);
+    convoRecorded.string = [[Global _settings] convo];
+}
+
+- (id)init {
+    self = [super init];
+    if(self) {
+        [[Global _settings] addListener:self];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [[Global _settings] removeListener:self];
+    [super dealloc];
+}
 
 - (IBAction)sendChatMessage:(id)sender {
     
@@ -35,7 +53,7 @@
     
     sending = [entered dataUsingEncoding:NSASCIIStringEncoding
                     allowLossyConversion:YES];
-    [[Singleton writeHandle] writeData:sending];
+    [[[Global _settings] writeHandle] writeData:sending];
     
     if ([entered length] >= 4) {
         if ([entered isEqualToString:@"testing13\n"]) {
@@ -46,15 +64,15 @@
     }
     
     
-    [Singleton setCurrentConvo:[[[Singleton currentConvo] stringByAppendingString:entered] copy]];
+    [[Global _settings] setConvo:[[[Global _settings] convo] stringByAppendingString:entered]];
     
-    NSLog(@"Singleton is: %@", [Singleton currentConvo]);
+    NSLog(@"Singleton is: %@",[[Global _settings] convo]);
 
 
     
-    [convoRecorded setString:[Singleton currentConvo]];
+    //[[Global convoRecorded] setString:[Global currentConvo]];
     //[convoRecorded insertText:currentConvo];
-    
+    NSLog(@"DING");
     
     // reset the text field
     [text setStringValue:@""];

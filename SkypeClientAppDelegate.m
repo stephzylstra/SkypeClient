@@ -7,7 +7,7 @@
 //
 
 #import "SkypeClientAppDelegate.h"
-#import "Singleton.h"
+#import "Global.h"
 
 
 @implementation SkypeClientAppDelegate
@@ -26,26 +26,26 @@
     // sleep to make sure it has started up
     sleep(1);
     
-    
     // start up C++ application which handles the data
     processor = [[NSTask alloc] init];
     [processor setLaunchPath:@"/Users/stephaniezylstra/Desktop/skypekit-sdk_sdk-3.4.1.11_342604/interfaces/skype/cpp_embedded/build/skypekitclient"];
     NSArray *arguments;
     arguments = [NSArray arrayWithObjects: @"-t", @"/Users/stephaniezylstra/Desktop/skypekit-sdk_sdk-3.4.1.11_342604/interfaces/skype/cpp_embedded/build/keypair.crt", nil];
     [processor setArguments: arguments];
-    [processor setStandardInput:[Singleton writePipe]];
     
+    NSLog(@"%@",[Global _settings]);
+    [processor setStandardInput:[[Global _settings] writePipe]];
     
     // set up reading from the C++ app
-    [processor setStandardOutput:[Singleton readPipe]];
-        
+    [processor setStandardOutput:[[Global _settings] readPipe]];
+    
     // actually launch the app
     [processor launch];
     
     
     // cause the read handle to start watching for new messages
-    [[Singleton readHandle] waitForDataInBackgroundAndNotify];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutDataAvailable:) name:NSFileHandleDataAvailableNotification object:[Singleton readHandle]];
+    [[[Global _settings] readHandle] waitForDataInBackgroundAndNotify];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutDataAvailable:) name:NSFileHandleDataAvailableNotification object:[[Global _settings] readHandle]];
     
 }
 
@@ -65,8 +65,8 @@
     NSFileHandle *handle = (NSFileHandle *)[notification object];
     NSString *str = [[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding];
     [handle waitForDataInBackgroundAndNotify];
-    [Singleton setCurrentConvo:[[[Singleton currentConvo] stringByAppendingString:str] copy]];
-    NSLog(@"%@:)\n", str);
+    [Global _settings].convo = [[[Global _settings] convo] stringByAppendingString:str];
+    [[Global _settings] messageListeners];
 }
 
 

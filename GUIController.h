@@ -17,6 +17,7 @@
 }
 
 - (IBAction)sendChatMessage:(id)sender;
+- (void)dataUpdated;
 
 
 
