@@ -14,12 +14,15 @@
     IBOutlet NSScrollView *conversation;
     IBOutlet NSTextView *convoRecorded;
     //NSString *currentConvo;
+    NSMutableArray *convoData;
 }
 
 - (IBAction)sendChatMessage:(id)sender;
 - (void)dataUpdated;
 
 
+
+//@property (readwrite, copy) NSMutableArray *convoData;
 
 //@property (assign) NSString *currentConvo;
 

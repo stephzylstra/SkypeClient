@@ -11,10 +11,25 @@
 
 
 @implementation SkypeClientAppDelegate
+@synthesize _tableview;
 
 @synthesize window;
 
+    
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     // start up Skype runtime kit (needs to be running straight up)
@@ -33,7 +48,6 @@
     arguments = [NSArray arrayWithObjects: @"-t", @"/Users/stephaniezylstra/Desktop/skypekit-sdk_sdk-3.4.1.11_342604/interfaces/skype/cpp_embedded/build/keypair.crt", nil];
     [processor setArguments: arguments];
     
-    NSLog(@"%@",[Global _settings]);
     [processor setStandardInput:[[Global _settings] writePipe]];
     
     // set up reading from the C++ app
@@ -65,8 +79,10 @@
     NSFileHandle *handle = (NSFileHandle *)[notification object];
     NSString *str = [[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding];
     [handle waitForDataInBackgroundAndNotify];
+    [[Global _settings] addConvoLine:str];
     [Global _settings].convo = [[[Global _settings] convo] stringByAppendingString:str];
     [[Global _settings] messageListeners];
+    [_tableview reloadData];
 }
 
 

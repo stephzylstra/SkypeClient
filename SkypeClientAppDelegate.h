@@ -13,11 +13,12 @@
     NSWindow *window;
     NSTask *runtime;
     NSTask *processor;
+    NSTableView *_tableview;
 }
 
 - (void)stdoutDataAvailable:(NSNotification *)notification;
 
-
+@property (assign) IBOutlet NSTableView *_tableview;
 @property (assign) IBOutlet NSWindow *window;
 
 @end

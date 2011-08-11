@@ -13,7 +13,7 @@
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe,convo;
+@synthesize listeners,readPipe,writePipe,convo, convoLine;
 
 +(Global*)_settings
 {
@@ -32,6 +32,14 @@ static Global* _settings = nil;
     self = [super init];
     if(self != nil) {
         self.listeners = [[[NSMutableArray alloc] init] autorelease];
+        self.convoLine = [[[NSMutableArray alloc] init] autorelease];
+        
+        [self addConvoLine:@"Test 1"];
+        [self addConvoLine:@"Test 2"];
+        [self addConvoLine:@"Test 3"];
+        [self addConvoLine:@"Test 4"];
+        [self addConvoLine:@"Test 5"];
+
         convo = @"";
         self.readPipe = [NSPipe pipe];
         self.writePipe = [NSPipe pipe];
@@ -62,11 +70,18 @@ static Global* _settings = nil;
     [self.listeners removeObject:object];
 }
 
+- (void)addConvoLine:(id)object {
+    [self.convoLine addObject:object];
+}
+
+- (void)removeConvoLine:(id)object {
+    [self.convoLine removeObject:object];
+}
+
+
 - (void)messageListeners {
-    NSLog(@"ZZ NEW COUNT %lu",[listeners count]);
     for(int i=0; i<[self.listeners count]; i++) {
         [(GUIController *)[self.listeners objectAtIndex:i] dataUpdated];
-        NSLog(@"XX %@",[self.listeners objectAtIndex:i]);
     }
 }
 
