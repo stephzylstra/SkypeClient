@@ -12,31 +12,16 @@
 
 @implementation SkypeClientAppDelegate
 @synthesize _tableview;
-
 @synthesize window;
+@synthesize _convoTableView;
 
     
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     // start up Skype runtime kit (needs to be running straight up)
     runtime = [[NSTask alloc] init];
     [runtime setLaunchPath:@"/Users/stephaniezylstra/Desktop/mac-x86-skypekit-novideo_3.4.1.741_371149/bin/mac-x86/mac-x86-skypekit-novideo"];
     [runtime launch];   
-    
     
     // sleep to make sure it has started up
     sleep(1);
@@ -55,7 +40,6 @@
     
     // actually launch the app
     [processor launch];
-    
     
     // cause the read handle to start watching for new messages
     [[[Global _settings] readHandle] waitForDataInBackgroundAndNotify];
@@ -79,10 +63,30 @@
     NSFileHandle *handle = (NSFileHandle *)[notification object];
     NSString *str = [[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding];
     [handle waitForDataInBackgroundAndNotify];
-    [[Global _settings] addConvoLine:str];
-    [Global _settings].convo = [[[Global _settings] convo] stringByAppendingString:str];
+    //[Global _settings].convo = [[[Global _settings] convo] stringByAppendingString:str];
     [[Global _settings] messageListeners];
+    
+    NSLog(@"%@", str);
+    
+    if ([[[Global _settings] commandProcessor] isConversation:str]) {
+        
+        NSLog(@"Chat message received\n");
+        
+        NSString *sender = [[[Global _settings] commandProcessor] getConversationSender:str];
+
+        [[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];
+        [NSApp requestUserAttention:NSCriticalRequest];
+        
+        [[Global _settings] addConvoLine:[[[Global _settings] commandProcessor] getConversationMessage:str]];
+        
+        [[Global _settings] addConvoSpeakers:sender];
+        
+    }
+    
+    
     [_tableview reloadData];
+    [_convoTableView reloadData];
+
 }
 
 

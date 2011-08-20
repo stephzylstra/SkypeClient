@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CommandProcessor.h"
+
 
 @interface Global : NSObject {
     NSFileHandle *_readHandle;
     NSFileHandle *_writeHandle;
+    CommandProcessor *_commandProcessor;
 }
 
 +(Global *)_settings;
@@ -20,16 +23,23 @@
 @property (nonatomic,retain) NSPipe *writePipe;
 @property (nonatomic,copy) NSString *convo;
 @property (nonatomic, retain) NSMutableArray *convoLine;
+@property (nonatomic, retain) NSMutableArray *convoSpeakers;
+@property (nonatomic, retain) NSMutableArray *onlineContacts;
+@property (nonatomic, retain) CommandProcessor *commandProcessor;
+@property (nonatomic) NSInteger sentCount;
 
 - (NSFileHandle *)readHandle;
 - (NSFileHandle *)writeHandle;
 
-- (void)addListener:(id)object;
-- (void)removeListener:(id)object;
-- (void)messageListeners;
+- (void) addListener:(id)object;
+- (void) removeListener:(id)object;
+- (void) messageListeners;
 - (void) addConvoLine:(id)object;
 - (void) removeConvoLine:(id) objects;
-
+- (void) addConvoSpeakers:(id)object;
+- (void) removeConvoSpeakers:(id)object;
+- (void) addOnlineContacts:(id)object;
+- (void) removeOnlineContacts:(id)object;
 
 @end
 

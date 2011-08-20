@@ -11,14 +11,16 @@
 
 @interface SkypeClientAppDelegate : NSObject <NSApplicationDelegate> {
     NSWindow *window;
+    NSTableView *_convoTableView;
     NSTask *runtime;
     NSTask *processor;
-    NSTableView *_tableview;
+    //NSTableView *_tableview;
 }
 
 - (void)stdoutDataAvailable:(NSNotification *)notification;
 
-@property (assign) IBOutlet NSTableView *_tableview;
+@property (retain) IBOutlet NSTableView *_tableview;
 @property (assign) IBOutlet NSWindow *window;
+@property (retain) IBOutlet NSTableView *_convoTableView;
 
 @end

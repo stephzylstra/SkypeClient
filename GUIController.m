@@ -21,9 +21,15 @@
 }
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView {
+    
+    if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
+        return (int)[[[Global _settings] onlineContacts] count];
+
+    }
+    return (int)[[[Global _settings] convoLine] count];
+
     //return [self.convoData count];
-    [tableView reloadData];
-    return [[[Global _settings] convoLine] count];
+    //[tableView reloadData];
 }
 
 /*- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row {
@@ -39,10 +45,23 @@
 - (NSView *)tableView:(NSTableView *)tableView
    viewForTableColumn:(NSTableColumn *)tableColumn
                   row:(NSInteger)row {
+    
+    
+    NSTableCellView *result;
+        
+    if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
+        result = [tableView makeViewWithIdentifier:@"contacts" owner:self];
+        result.textField.stringValue = [[[Global _settings] onlineContacts] objectAtIndex:row];
+    } else {
+        if ([[tableColumn identifier] isEqualToString:@"sender"]) {
+            result = [tableView makeViewWithIdentifier:@"sender" owner:self];
+            result.textField.stringValue = [[[Global _settings] convoSpeakers] objectAtIndex:row];
+        } else {
+            result = [tableView makeViewWithIdentifier:@"conversation" owner:self];
+            result.textField.stringValue = [[[Global _settings] convoLine] objectAtIndex:row];
+        }
+    }
 
-    NSTableCellView *result = [tableView makeViewWithIdentifier:@"test" owner:self];
-    NSLog(@"%@", result);
-    result.textField.stringValue = [[[Global _settings] convoLine] objectAtIndex:row];
     return result;
 }
 
@@ -50,6 +69,7 @@
     self = [super init];
     if(self) {
         [[Global _settings] addListener:self];
+        skypeAppDelegate = (SkypeClientAppDelegate *) [[NSApplication sharedApplication] delegate];
     }
     return self;
 }
@@ -61,37 +81,59 @@
 
 - (IBAction)sendChatMessage:(id)sender {
     
+    
+    if ([[text stringValue] isEqualToString:@""]) {
+        NSLog(@"returning");
+        return;
+    }
+    
+    NSString *entered;
+    
+    // if user is logged in, the message is an actual chat message
+    if ([[Global _settings] sentCount] < 5) {
+        if ([[Global _settings] sentCount] == 3) { // logged in, now get contacts
+            [[[Global _settings] commandProcessor] getContacts];
+        }
+        [[Global _settings] setSentCount:[[Global _settings] sentCount] + 1];
+        entered = [[text stringValue] stringByAppendingString:@"\n"];
+    } else {
+        // if already logged in, we don't care about the number of lines
+        entered = [[[[[NSString alloc] init] stringByAppendingString:@"hs\n"] stringByAppendingString:[text stringValue]] stringByAppendingString:@"\n"];
+    }
+        
     // send the message
-    NSString *entered =  [[text stringValue] stringByAppendingString:@"\n"];
     NSData *sending;
     
     sending = [entered dataUsingEncoding:NSASCIIStringEncoding
                     allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
     
-    if ([entered length] >= 3) {
+    /*if ([entered length] >= 3) {
         if ([entered isEqualToString:@"testing13\n"]) {
             entered = @"*********\n";
         }
     } else {
-        entered = @"\n";
-    }
+        entered = @"";
+    }*/
     
     
-    [[Global _settings] setConvo:[[[Global _settings] convo] stringByAppendingString:entered]];
+    
+    //NSLog(@"Sent count is: %ld", [[Global _settings] sentCount]);
+    
+    /*if ([entered length] == 0) {
+        [[Global _settings] addConvoLine:entered];
+        [[Global _settings] addConvoSpeakers:entered];
+        [((SkypeClientAppDelegate *)skypeAppDelegate)._tableview reloadData];
+    }*/
+
+
     
     //NSLog(@"Singleton is: %@",[[Global _settings] convo]);
-
-
-    
     //[[Global convoRecorded] setString:[Global currentConvo]];
     //[convoRecorded insertText:currentConvo];
     //NSLog(@"DING");
     
     // reset the text field
-    
-    
-    
     [text setStringValue:@""];
     
 }

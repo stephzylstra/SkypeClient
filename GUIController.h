@@ -15,6 +15,7 @@
     IBOutlet NSTextView *convoRecorded;
     //NSString *currentConvo;
     NSMutableArray *convoData;
+    NSApplication *skypeAppDelegate;
 }
 
 - (IBAction)sendChatMessage:(id)sender;

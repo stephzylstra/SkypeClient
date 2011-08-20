@@ -13,9 +13,9 @@
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe,convo, convoLine;
+@synthesize listeners,readPipe,writePipe,convo, convoLine, convoSpeakers, commandProcessor, sentCount, onlineContacts;
 
-+(Global*)_settings
++ (Global *) _settings
 {
 	@synchronized([Global class])
 	{
@@ -33,14 +33,10 @@ static Global* _settings = nil;
     if(self != nil) {
         self.listeners = [[[NSMutableArray alloc] init] autorelease];
         self.convoLine = [[[NSMutableArray alloc] init] autorelease];
-        
-        [self addConvoLine:@"Test 1"];
-        [self addConvoLine:@"Test 2"];
-        [self addConvoLine:@"Test 3"];
-        [self addConvoLine:@"Test 4"];
-        [self addConvoLine:@"Test 5"];
-
+        self.convoSpeakers = [[[NSMutableArray alloc] init] autorelease];
+        self.onlineContacts = [[[NSMutableArray alloc] init] autorelease];
         convo = @"";
+        sentCount = 0;
         self.readPipe = [NSPipe pipe];
         self.writePipe = [NSPipe pipe];
     }
@@ -62,20 +58,36 @@ static Global* _settings = nil;
     return _readHandle;
 }
 
-- (void)addListener:(id)object {
+- (void) addListener:(id)object {
     [self.listeners addObject:object];
 }
 
-- (void)removeListener:(id)object {
+- (void) removeListener:(id)object {
     [self.listeners removeObject:object];
 }
 
-- (void)addConvoLine:(id)object {
+- (void) addConvoLine:(id)object {
     [self.convoLine addObject:object];
 }
 
-- (void)removeConvoLine:(id)object {
+- (void) removeConvoLine:(id)object {
     [self.convoLine removeObject:object];
+}
+
+- (void) addConvoSpeakers:(id)object {
+    [self.convoSpeakers addObject:object];
+}
+
+- (void) removeConvoSpeakers:(id)object {
+    [self.convoSpeakers removeObject:object];
+}
+
+- (void) addOnlineContacts:(id)object {
+    [self.onlineContacts addObject:object];
+}
+
+- (void) removeOnlineContacts:(id)object {
+    [self.onlineContacts removeObject:object];
 }
 
 
@@ -84,6 +96,14 @@ static Global* _settings = nil;
         [(GUIController *)[self.listeners objectAtIndex:i] dataUpdated];
     }
 }
+
+- (CommandProcessor *) commandProcessor {
+    if (!_commandProcessor) {
+        _commandProcessor = [[CommandProcessor alloc] init];
+    }
+    return _commandProcessor;
+}
+
 
 - (void)dealloc {
     [listeners release];
