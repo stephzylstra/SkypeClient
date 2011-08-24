@@ -45,6 +45,9 @@
     [[[Global _settings] readHandle] waitForDataInBackgroundAndNotify];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutDataAvailable:) name:NSFileHandleDataAvailableNotification object:[[Global _settings] readHandle]];
     
+    // associate clicks on contact list with a conversation
+    [_convoTableView setAction:@selector(chooseConversation:)];
+    
 }
 
 -(void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -63,30 +66,70 @@
     NSFileHandle *handle = (NSFileHandle *)[notification object];
     NSString *str = [[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding];
     [handle waitForDataInBackgroundAndNotify];
-    //[Global _settings].convo = [[[Global _settings] convo] stringByAppendingString:str];
     [[Global _settings] messageListeners];
-    
-    NSLog(@"%@", str);
+
     
     if ([[[Global _settings] commandProcessor] isConversation:str]) {
         
-        NSLog(@"Chat message received\n");
-        
+        NSString *name = [[[Global _settings] commandProcessor] getConversationName:str];
         NSString *sender = [[[Global _settings] commandProcessor] getConversationSender:str];
 
-        [[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];
-        [NSApp requestUserAttention:NSCriticalRequest];
         
-        [[Global _settings] addConvoLine:[[[Global _settings] commandProcessor] getConversationMessage:str]];
+        /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];
+        [NSApp requestUserAttention:NSCriticalRequest];*/
         
-        [[Global _settings] addConvoSpeakers:sender];
+        /*[[Global _settings] addConvoLine:[[[Global _settings] commandProcessor] getConversationMessage:str]];
         
+        [[Global _settings] addConvoSpeakers:sender];*/
+        
+        NSArray *details = [[[Global _settings] conversationText] objectForKey:name];
+        
+        if (details == nil) {
+            details = [[NSArray alloc]
+                    initWithObjects:[[NSMutableArray alloc] init],[[NSMutableArray alloc] init], nil];
+        }
+        
+                
+        [[details objectAtIndex:0] addObject:sender];
+        [[details objectAtIndex:1] addObject:[[[Global _settings] commandProcessor] getConversationMessage:str]];
+        
+        [[Global _settings] addConversation:name:details];
+        
+    } else {
+        NSLog(@"%@", str);
     }
     
     
     [_tableview reloadData];
+    if ([[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] > 0) {
+        [_tableview scrollRowToVisible:[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] - 1];
+    }
     [_convoTableView reloadData];
 
+}
+
+
+- (void) chooseConversation:(id)sender {
+    
+    if (sender == _convoTableView) {
+        
+        NSString *conversation = (NSString *)[[[Global _settings] onlineContacts] objectAtIndex:[_convoTableView selectedRow]];
+        
+        NSString *command = [[@"cu\n" stringByAppendingString:conversation] stringByAppendingString:@"\n"];
+        
+        NSData *sending = [command dataUsingEncoding:NSASCIIStringEncoding
+                                   allowLossyConversion:YES];
+        [[[Global _settings] writeHandle] writeData:sending];
+                
+        [[Global _settings] setCurrentConversation:conversation];
+        
+        [_tableview reloadData];
+        
+        
+    }
+    
+    
+    
 }
 
 

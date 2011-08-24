@@ -11,6 +11,7 @@
 @interface CommandProcessor : NSObject
 
 - (NSString *) getConversationSender:(NSString *) line;
+- (NSString *) getConversationName:(NSString *) line;
 - (BOOL) isConversation:(NSString *)line;
 - (BOOL) isAccountCommand:(NSString *)line;
 - (NSArray *) splitLineAtSeparator:(NSString *) line;

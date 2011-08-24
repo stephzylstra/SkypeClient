@@ -13,7 +13,7 @@
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe,convo, convoLine, convoSpeakers, commandProcessor, sentCount, onlineContacts;
+@synthesize listeners,readPipe,writePipe,convo, convoLine, convoSpeakers, commandProcessor, sentCount, onlineContacts, conversationText, currentConversation;
 
 + (Global *) _settings
 {
@@ -35,7 +35,9 @@ static Global* _settings = nil;
         self.convoLine = [[[NSMutableArray alloc] init] autorelease];
         self.convoSpeakers = [[[NSMutableArray alloc] init] autorelease];
         self.onlineContacts = [[[NSMutableArray alloc] init] autorelease];
+        self.conversationText = [[[NSMutableDictionary alloc] init] autorelease];
         convo = @"";
+        currentConversation = @"";
         sentCount = 0;
         self.readPipe = [NSPipe pipe];
         self.writePipe = [NSPipe pipe];
@@ -102,6 +104,14 @@ static Global* _settings = nil;
         _commandProcessor = [[CommandProcessor alloc] init];
     }
     return _commandProcessor;
+}
+
+- (void) addConversation:(NSString *)key:(id)conversation {
+    [conversationText setObject:conversation forKey:key];
+}
+
+- (void) removeConversation:(NSString *)key {
+    
 }
 
 

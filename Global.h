@@ -27,6 +27,8 @@
 @property (nonatomic, retain) NSMutableArray *onlineContacts;
 @property (nonatomic, retain) CommandProcessor *commandProcessor;
 @property (nonatomic) NSInteger sentCount;
+@property (nonatomic, retain) NSMutableDictionary *conversationText;
+@property (nonatomic, copy) NSString *currentConversation;
 
 - (NSFileHandle *)readHandle;
 - (NSFileHandle *)writeHandle;
@@ -40,6 +42,8 @@
 - (void) removeConvoSpeakers:(id)object;
 - (void) addOnlineContacts:(id)object;
 - (void) removeOnlineContacts:(id)object;
+- (void) addConversation:(NSString *)key:(id)conversation;
+- (void) removeConversation:(NSString *)key;
 
 @end
 

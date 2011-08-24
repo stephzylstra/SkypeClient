@@ -12,11 +12,7 @@
 
 @implementation GUIController
 
-
-
-
-- (void)dataUpdated {
-    //NSLog(@"NEW DATA: %@",[[Global _settings] convo]);
+- (void) dataUpdated {
     convoRecorded.string = [[Global _settings] convo];
 }
 
@@ -26,19 +22,8 @@
         return (int)[[[Global _settings] onlineContacts] count];
 
     }
-    return (int)[[[Global _settings] convoLine] count];
-
-    //return [self.convoData count];
-    //[tableView reloadData];
+    return (int)[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count];
 }
-
-/*- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-    NSLog(@"obj val");
-    NSLog(@"%@", [self.convoData objectAtIndex:row]);
-    return [self.convoData objectAtIndex:row];
-    
-}*/
-
 
 
 
@@ -52,16 +37,22 @@
     if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
         result = [tableView makeViewWithIdentifier:@"contacts" owner:self];
         result.textField.stringValue = [[[Global _settings] onlineContacts] objectAtIndex:row];
+
     } else {
+        
+        NSArray *correctRow = (NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]];
+        
+        
         if ([[tableColumn identifier] isEqualToString:@"sender"]) {
             result = [tableView makeViewWithIdentifier:@"sender" owner:self];
-            result.textField.stringValue = [[[Global _settings] convoSpeakers] objectAtIndex:row];
+            result.textField.stringValue = [[correctRow objectAtIndex:0] objectAtIndex:row];
         } else {
             result = [tableView makeViewWithIdentifier:@"conversation" owner:self];
-            result.textField.stringValue = [[[Global _settings] convoLine] objectAtIndex:row];
+            NSLog(@"conversation message at row %ld is %@", row, [[correctRow objectAtIndex:1] objectAtIndex:row]);
+            result.textField.stringValue = [[correctRow objectAtIndex:1] objectAtIndex:row];
         }
+        //[result.textField sizeToFit];
     }
-
     return result;
 }
 
@@ -83,7 +74,7 @@
     
     
     if ([[text stringValue] isEqualToString:@""]) {
-        NSLog(@"returning");
+        NSLog(@"empty chat message");
         return;
     }
     

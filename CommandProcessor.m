@@ -25,7 +25,7 @@
 
 
 - (BOOL) isConversation:(NSString *)line {
-    return [line hasPrefix:@"CHAT."];
+    return [line hasPrefix:@"CHAT: "];
 }
 
 - (BOOL) isAccountCommand:(NSString *)line {
@@ -34,11 +34,19 @@
 
 
 - (NSString *) getConversationSender:(NSString *) line {
-    NSString *sender = [line stringByReplacingOccurrencesOfString:@"CHAT." withString:@""];
+    NSString *sender = [line stringByReplacingOccurrencesOfString:@"CHAT: " withString:@""];
     //sender = [[sender componentsSeparatedByString:@": "] objectAtIndex:0];
     sender = [[[[Global _settings] commandProcessor] splitLineAtSeparator:sender] objectAtIndex:0];
-    //NSLog(@"sender is %@\n", sender);
+    NSLog(@"sender is %@\n", sender);
     return sender;
+}
+
+- (NSString *) getConversationName:(NSString *) line {
+    NSString *name = [line stringByReplacingOccurrencesOfString:@"CHAT: " withString:@""];
+    //sender = [[sender componentsSeparatedByString:@": "] objectAtIndex:0];
+    name = [[[[Global _settings] commandProcessor] splitLineAtSeparator:name] objectAtIndex:1];
+    NSLog(@"name is %@\n", name);
+    return name;
 }
 
 - (NSArray *) splitLineAtSeparator:(NSString *) line {
@@ -47,10 +55,10 @@
 }
 
 - (NSString *) getConversationMessage:(NSString *) line {
-    NSString *message = [line stringByReplacingOccurrencesOfString:@"CHAT." withString:@""];
+    NSString *message = [line stringByReplacingOccurrencesOfString:@"CHAT: " withString:@""];
     //sender = [[sender componentsSeparatedByString:@": "] objectAtIndex:0];
-    message = [[[[Global _settings] commandProcessor] splitLineAtSeparator:message] objectAtIndex:1];
-    //NSLog(@"message is %@\n", message);
+    message = [[[[Global _settings] commandProcessor] splitLineAtSeparator:message] objectAtIndex:2];
+    NSLog(@"message is %@\n", message);
     
     
     message = [message stringByReplacingOccurrencesOfString:@"&apos;" withString:@"'"];
@@ -61,9 +69,7 @@
 
 
 - (void) getContacts {
-    
-    NSLog(@"getting contacts");
-    
+        
     NSApplication *appDelegate = [[NSApplication sharedApplication] delegate]; // will need to cast each time
         
     NSData *sending = [@"lg\n4\n" dataUsingEncoding:NSASCIIStringEncoding
