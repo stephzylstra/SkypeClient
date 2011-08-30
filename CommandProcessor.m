@@ -32,12 +32,19 @@
     return [line hasPrefix:@"ACCOUNT."];
 }
 
+- (BOOL) isLoginCheck:(NSString *) line {
+    return [line hasPrefix:@"SKYPE.LOGGEDIN"];
+}
+
+- (BOOL) isContactListChange:(NSString *) line {
+    return [line hasPrefix:@"SKYPE.CONTACTLIST"];
+}
+
 
 - (NSString *) getConversationSender:(NSString *) line {
     NSString *sender = [line stringByReplacingOccurrencesOfString:@"CHAT: " withString:@""];
     //sender = [[sender componentsSeparatedByString:@": "] objectAtIndex:0];
     sender = [[[[Global _settings] commandProcessor] splitLineAtSeparator:sender] objectAtIndex:0];
-    NSLog(@"sender is %@\n", sender);
     return sender;
 }
 
@@ -45,7 +52,6 @@
     NSString *name = [line stringByReplacingOccurrencesOfString:@"CHAT: " withString:@""];
     //sender = [[sender componentsSeparatedByString:@": "] objectAtIndex:0];
     name = [[[[Global _settings] commandProcessor] splitLineAtSeparator:name] objectAtIndex:1];
-    NSLog(@"name is %@\n", name);
     return name;
 }
 
@@ -56,14 +62,9 @@
 
 - (NSString *) getConversationMessage:(NSString *) line {
     NSString *message = [line stringByReplacingOccurrencesOfString:@"CHAT: " withString:@""];
-    //sender = [[sender componentsSeparatedByString:@": "] objectAtIndex:0];
     message = [[[[Global _settings] commandProcessor] splitLineAtSeparator:message] objectAtIndex:2];
-    NSLog(@"message is %@\n", message);
-    
-    
     message = [message stringByReplacingOccurrencesOfString:@"&apos;" withString:@"'"];
     message = [message stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
-    
     return message;
 }
 
@@ -71,14 +72,16 @@
 - (void) getContacts {
         
     NSApplication *appDelegate = [[NSApplication sharedApplication] delegate]; // will need to cast each time
-        
     NSData *sending = [@"lg\n4\n" dataUsingEncoding:NSASCIIStringEncoding
                     allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
     
     NSString *rawData = [[NSString alloc] initWithData:[[[Global _settings] readHandle] availableData] encoding:NSUTF8StringEncoding];
-    
+        
     NSArray *contacts = [rawData componentsSeparatedByString:@"\n"];
+    
+    [[[Global _settings] onlineContacts] removeAllObjects];
+
     for (int i = 0; i < [contacts count]; i++) {
         if ([[contacts objectAtIndex:i] hasPrefix:@"SKYPE.Contact"]) {
             

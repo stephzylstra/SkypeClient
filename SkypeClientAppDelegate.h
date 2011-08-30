@@ -15,12 +15,24 @@
     NSTask *runtime;
     NSTask *processor;
     //NSTableView *_tableview;
+    IBOutlet NSWindow *loginWindow;
+    NSTextField *username;
+    NSSecureTextField *password;
 }
+@property (assign) IBOutlet NSTextField *username;
+@property (assign) IBOutlet NSSecureTextField *password;
 
-- (void)stdoutDataAvailable:(NSNotification *)notification;
+
 
 @property (retain) IBOutlet NSTableView *_tableview;
 @property (assign) IBOutlet NSWindow *window;
 @property (retain) IBOutlet NSTableView *_convoTableView;
+
+- (void)stdoutDataAvailable:(NSNotification *)notification;
+
+- (void) initialiseAfterLogin;
+
+- (IBAction)doLogin:(id)sender;
+
 
 @end

@@ -78,54 +78,16 @@
         return;
     }
     
-    NSString *entered;
+    NSString *entered = [[[[[[NSString alloc] init] autorelease] stringByAppendingString:@"hs\n"] stringByAppendingString:[text stringValue]] stringByAppendingString:@"\n"];
     
-    // if user is logged in, the message is an actual chat message
-    if ([[Global _settings] sentCount] < 5) {
-        if ([[Global _settings] sentCount] == 3) { // logged in, now get contacts
-            [[[Global _settings] commandProcessor] getContacts];
-        }
-        [[Global _settings] setSentCount:[[Global _settings] sentCount] + 1];
-        entered = [[text stringValue] stringByAppendingString:@"\n"];
-    } else {
-        // if already logged in, we don't care about the number of lines
-        entered = [[[[[NSString alloc] init] stringByAppendingString:@"hs\n"] stringByAppendingString:[text stringValue]] stringByAppendingString:@"\n"];
-    }
-        
     // send the message
-    NSData *sending;
-    
-    sending = [entered dataUsingEncoding:NSASCIIStringEncoding
-                    allowLossyConversion:YES];
+    NSData  *sending = [entered dataUsingEncoding:NSASCIIStringEncoding
+                             allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
     
-    /*if ([entered length] >= 3) {
-        if ([entered isEqualToString:@"testing13\n"]) {
-            entered = @"*********\n";
-        }
-    } else {
-        entered = @"";
-    }*/
-    
-    
-    
-    //NSLog(@"Sent count is: %ld", [[Global _settings] sentCount]);
-    
-    /*if ([entered length] == 0) {
-        [[Global _settings] addConvoLine:entered];
-        [[Global _settings] addConvoSpeakers:entered];
-        [((SkypeClientAppDelegate *)skypeAppDelegate)._tableview reloadData];
-    }*/
-
-
-    
-    //NSLog(@"Singleton is: %@",[[Global _settings] convo]);
-    //[[Global convoRecorded] setString:[Global currentConvo]];
-    //[convoRecorded insertText:currentConvo];
-    //NSLog(@"DING");
-    
-    // reset the text field
     [text setStringValue:@""];
+    
+    [[[Global _settings] commandProcessor] getContacts];
     
 }
 

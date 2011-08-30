@@ -13,7 +13,7 @@
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe,convo, convoLine, convoSpeakers, commandProcessor, sentCount, onlineContacts, conversationText, currentConversation;
+@synthesize listeners,readPipe,writePipe,convo, convoLine, convoSpeakers, commandProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn;
 
 + (Global *) _settings
 {
@@ -39,6 +39,7 @@ static Global* _settings = nil;
         convo = @"";
         currentConversation = @"";
         sentCount = 0;
+        isLoggedIn = NO;
         self.readPipe = [NSPipe pipe];
         self.writePipe = [NSPipe pipe];
     }

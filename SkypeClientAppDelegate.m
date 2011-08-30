@@ -11,6 +11,8 @@
 
 
 @implementation SkypeClientAppDelegate
+@synthesize username;
+@synthesize password;
 @synthesize _tableview;
 @synthesize window;
 @synthesize _convoTableView;
@@ -64,10 +66,11 @@
 
 - (void)stdoutDataAvailable:(NSNotification *)notification {
     NSFileHandle *handle = (NSFileHandle *)[notification object];
-    NSString *str = [[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding];
+    NSString *str = [[[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding] autorelease];
     [handle waitForDataInBackgroundAndNotify];
     [[Global _settings] messageListeners];
-
+    
+    NSLog(@"%@", str);
     
     if ([[[Global _settings] commandProcessor] isConversation:str]) {
         
@@ -75,14 +78,14 @@
         NSString *sender = [[[Global _settings] commandProcessor] getConversationSender:str];
 
         
-        /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];
-        [NSApp requestUserAttention:NSCriticalRequest];*/
+        /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];*/
+        [NSApp requestUserAttention:NSInformationalRequest];
         
         /*[[Global _settings] addConvoLine:[[[Global _settings] commandProcessor] getConversationMessage:str]];
         
         [[Global _settings] addConvoSpeakers:sender];*/
         
-        NSArray *details = [[[Global _settings] conversationText] objectForKey:name];
+        NSArray *details = [[[[Global _settings] conversationText] objectForKey:name] autorelease];
         
         if (details == nil) {
             details = [[NSArray alloc]
@@ -95,6 +98,12 @@
         
         [[Global _settings] addConversation:name:details];
         
+    } else if ([[[Global _settings] commandProcessor] isLoginCheck:str]) {
+        [[Global _settings] setIsLoggedIn:YES];
+        [self initialiseAfterLogin];
+        
+    } else if ([[[Global _settings] commandProcessor] isContactListChange:str]) {
+        [[[Global _settings] commandProcessor] getContacts];
     } else {
         NSLog(@"%@", str);
     }
@@ -108,10 +117,37 @@
 
 }
 
+- (IBAction)doLogin:(id)sender {
+    
+    
+    NSString *command = [[[[@"aL\n" stringByAppendingString:[username stringValue]] stringByAppendingString:@"\n"] stringByAppendingString:[password stringValue]] stringByAppendingString:@"\n"];
+    
+    NSData *sending = [command dataUsingEncoding:NSASCIIStringEncoding
+                            allowLossyConversion:YES];
+    [[[Global _settings] writeHandle] writeData:sending];
+        
+    //[_tableview reloadData];
+    
+}
+
+- (void) initialiseAfterLogin {
+    NSLog(@"inside initialise");
+    if ([[Global _settings] isLoggedIn]) {
+        sleep(5);
+        [[[Global _settings] commandProcessor] getContacts];
+        //[loginWindow orderOut:self];
+        
+        
+        [loginWindow close];
+        [window makeKeyAndOrderFront:self];
+        //[NSApp activateIgnoringOtherApps:YES];
+    }
+}
+
 
 - (void) chooseConversation:(id)sender {
     
-    if (sender == _convoTableView) {
+    if (sender == _convoTableView && [_convoTableView selectedRow] < [[[Global _settings] onlineContacts] count]) {
         
         NSString *conversation = (NSString *)[[[Global _settings] onlineContacts] objectAtIndex:[_convoTableView selectedRow]];
         

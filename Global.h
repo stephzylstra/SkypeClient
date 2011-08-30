@@ -18,17 +18,18 @@
 
 +(Global *)_settings;
 
-@property (nonatomic,retain) NSMutableArray *listeners;
-@property (nonatomic,retain) NSPipe *readPipe;
-@property (nonatomic,retain) NSPipe *writePipe;
-@property (nonatomic,copy) NSString *convo;
-@property (nonatomic, retain) NSMutableArray *convoLine;
-@property (nonatomic, retain) NSMutableArray *convoSpeakers;
-@property (nonatomic, retain) NSMutableArray *onlineContacts;
-@property (nonatomic, retain) CommandProcessor *commandProcessor;
-@property (nonatomic) NSInteger sentCount;
-@property (nonatomic, retain) NSMutableDictionary *conversationText;
-@property (nonatomic, copy) NSString *currentConversation;
+@property (retain) NSMutableArray *listeners;
+@property (retain) NSPipe *readPipe;
+@property (retain) NSPipe *writePipe;
+@property (copy) NSString *convo;
+@property (retain) NSMutableArray *convoLine;
+@property (retain) NSMutableArray *convoSpeakers;
+@property (retain) NSMutableArray *onlineContacts;
+@property (retain) CommandProcessor *commandProcessor;
+@property NSInteger sentCount;
+@property (retain) NSMutableDictionary *conversationText;
+@property (copy) NSString *currentConversation;
+@property BOOL isLoggedIn;
 
 - (NSFileHandle *)readHandle;
 - (NSFileHandle *)writeHandle;

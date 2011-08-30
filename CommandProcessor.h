@@ -17,5 +17,7 @@
 - (NSArray *) splitLineAtSeparator:(NSString *) line;
 - (NSString *) getConversationMessage:(NSString *) line;
 - (void) getContacts;
+- (BOOL) isLoginCheck:(NSString *) line;
+- (BOOL) isContactListChange:(NSString *) line;
 
 @end
