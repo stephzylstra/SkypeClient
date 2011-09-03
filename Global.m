@@ -7,13 +7,12 @@
 //
 
 #import "Global.h"
-#import "GUIController.h"
 
 @implementation Global
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe,convo, convoLine, convoSpeakers, commandProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn;
+@synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn;
 
 + (Global *) _settings
 {
@@ -31,17 +30,16 @@ static Global* _settings = nil;
 - (id) init {
     self = [super init];
     if(self != nil) {
-        self.listeners = [[[NSMutableArray alloc] init] autorelease];
-        self.convoLine = [[[NSMutableArray alloc] init] autorelease];
-        self.convoSpeakers = [[[NSMutableArray alloc] init] autorelease];
-        self.onlineContacts = [[[NSMutableArray alloc] init] autorelease];
-        self.conversationText = [[[NSMutableDictionary alloc] init] autorelease];
-        convo = @"";
+        self.listeners = [[NSMutableArray alloc] init];
+        self.onlineContacts = [[NSMutableArray alloc] init];
+        self.conversationText = [[NSMutableDictionary alloc] init];
         currentConversation = @"";
         sentCount = 0;
         isLoggedIn = NO;
         self.readPipe = [NSPipe pipe];
         self.writePipe = [NSPipe pipe];
+        self.fileProcessor = [[FileProcessor alloc] init];
+        self.statistics = [[Statistics alloc] init];
     }
     return self;
 }
@@ -69,22 +67,6 @@ static Global* _settings = nil;
     [self.listeners removeObject:object];
 }
 
-- (void) addConvoLine:(id)object {
-    [self.convoLine addObject:object];
-}
-
-- (void) removeConvoLine:(id)object {
-    [self.convoLine removeObject:object];
-}
-
-- (void) addConvoSpeakers:(id)object {
-    [self.convoSpeakers addObject:object];
-}
-
-- (void) removeConvoSpeakers:(id)object {
-    [self.convoSpeakers removeObject:object];
-}
-
 - (void) addOnlineContacts:(id)object {
     [self.onlineContacts addObject:object];
 }
@@ -93,8 +75,7 @@ static Global* _settings = nil;
     [self.onlineContacts removeObject:object];
 }
 
-
-- (void)messageListeners {
+- (void) messageListeners {
     for(int i=0; i<[self.listeners count]; i++) {
         [(GUIController *)[self.listeners objectAtIndex:i] dataUpdated];
     }
@@ -106,6 +87,21 @@ static Global* _settings = nil;
     }
     return _commandProcessor;
 }
+
+/*- (Statistics *) statistics {
+    if (!_statistics) {
+        _statistics = [[Statistics alloc] init];
+    }
+    return _statistics;
+}*/
+
+/*- (FileProcessor *) fileProcessor {
+    if (!fp) {
+        fp = [[FileProcessor alloc] init];
+    }
+    return fp;
+}*/
+
 
 - (void) addConversation:(NSString *)key:(id)conversation {
     [conversationText setObject:conversation forKey:key];

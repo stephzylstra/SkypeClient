@@ -1,0 +1,22 @@
+//
+//  Statistics.h
+//  SkypeClient
+//
+//  Created by Stephanie Zylstra on 3/09/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+
+
+@interface Statistics : NSObject
+
+- (NSArray *) sessionsForContact:(NSString *)contact: (NSString *)loggedInAccountName; // will find actual convo based on conversation parameter and convert that into a list of sessions
+
+
+- (NSArray *) mostFrequentChats:(NSString *) loggedInAccountName;
+- (NSInteger) averageNumberOfLines:(NSString *) loggedInAccountName;
+- (NSDictionary *) percentageOfChatsStarted: (NSString *) loggedInAccountName;
+- (NSInteger) averageResponseTime:(NSString *) loggedInAccountName;
+- (NSInteger) averageNumberOfQuestions:(NSString *) loggedInAccountName;
+
+@end

@@ -17,7 +17,7 @@
 @synthesize window;
 @synthesize _convoTableView;
 
-    
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     
     // start up Skype runtime kit (needs to be running straight up)
@@ -27,6 +27,9 @@
     
     // sleep to make sure it has started up
     sleep(1);
+    
+    // set up mutex for threading
+    lock = [[NSLock alloc] init];
     
     // start up C++ application which handles the data
     processor = [[NSTask alloc] init];
@@ -65,34 +68,38 @@
 }
 
 - (void)stdoutDataAvailable:(NSNotification *)notification {
-    NSFileHandle *handle = (NSFileHandle *)[notification object];
-    NSString *str = [[[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding] autorelease];
+
+    NSFileHandle *handle = (NSFileHandle *)[((NSNotification *)notification) object];
+    [lock lock];
+    NSString *str = [[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding];
     [handle waitForDataInBackgroundAndNotify];
     [[Global _settings] messageListeners];
+    [lock unlock];
     
-    NSLog(@"%@", str);
+    [self performSelectorOnMainThread:@selector(processStdoutData:) withObject:str waitUntilDone:NO];
+
+}
+
+
+- (void) processStdoutData:(NSString *)str {
     
     if ([[[Global _settings] commandProcessor] isConversation:str]) {
         
         NSString *name = [[[Global _settings] commandProcessor] getConversationName:str];
         NSString *sender = [[[Global _settings] commandProcessor] getConversationSender:str];
-
+        
         
         /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];*/
         [NSApp requestUserAttention:NSInformationalRequest];
         
-        /*[[Global _settings] addConvoLine:[[[Global _settings] commandProcessor] getConversationMessage:str]];
-        
-        [[Global _settings] addConvoSpeakers:sender];*/
-        
-        NSArray *details = [[[[Global _settings] conversationText] objectForKey:name] autorelease];
+        NSArray *details = [[[Global _settings] conversationText] objectForKey:name];
         
         if (details == nil) {
             details = [[NSArray alloc]
-                    initWithObjects:[[NSMutableArray alloc] init],[[NSMutableArray alloc] init], nil];
+                       initWithObjects:[[NSMutableArray alloc] init],[[NSMutableArray alloc] init], nil];
         }
         
-                
+        
         [[details objectAtIndex:0] addObject:sender];
         [[details objectAtIndex:1] addObject:[[[Global _settings] commandProcessor] getConversationMessage:str]];
         
@@ -114,8 +121,11 @@
         [_tableview scrollRowToVisible:[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] - 1];
     }
     [_convoTableView reloadData];
+    
+    [self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:nil waitUntilDone:NO];
 
 }
+
 
 - (IBAction)doLogin:(id)sender {
     
@@ -125,7 +135,7 @@
     NSData *sending = [command dataUsingEncoding:NSASCIIStringEncoding
                             allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
-        
+    
     //[_tableview reloadData];
     
 }
@@ -133,7 +143,7 @@
 - (void) initialiseAfterLogin {
     NSLog(@"inside initialise");
     if ([[Global _settings] isLoggedIn]) {
-        sleep(5);
+        sleep(8);
         [[[Global _settings] commandProcessor] getContacts];
         //[loginWindow orderOut:self];
         
@@ -154,9 +164,9 @@
         NSString *command = [[@"cu\n" stringByAppendingString:conversation] stringByAppendingString:@"\n"];
         
         NSData *sending = [command dataUsingEncoding:NSASCIIStringEncoding
-                                   allowLossyConversion:YES];
+                                allowLossyConversion:YES];
         [[[Global _settings] writeHandle] writeData:sending];
-                
+        
         [[Global _settings] setCurrentConversation:conversation];
         
         [_tableview reloadData];
@@ -164,9 +174,52 @@
         
     }
     
+}
+
+
+- (IBAction)test:(id)sender {
     
+    /* NSLog(@"Should be outputting image");
+     
+     NSData *sending = [@"lv\nstephaniezylstra\n" dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+     
+     [[[Global _settings] writeHandle] writeData:sending];
+     
+     NSString *rawData = [[NSString alloc] initWithData:[[[Global _settings] readHandle] availableData] encoding:NSUTF8StringEncoding];
+     
+     //NSImage *test = [[NSImage alloc] initWithData:[[[Global _settings] readHandle] availableData]];
+     
+     NSLog(@"%@", rawData);
+     
+     // NSLog(@"%@", [@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath]);
+     
+     NSArray *correctConversation = (NSArray *)[[[Global _settings] conversationText] objectForKey:@"echo123"];
+     
+     [[[Global _settings] fileProcessor] writeToConversation:@"test1" :@"test2" :correctConversation];*/
+    
+    
+    NSLog(@"Inside test");
+    
+    [NSThread detachNewThreadSelector:@selector(bgThread:) toTarget:self withObject:nil];
+    
+    //[[[Global _settings] fileProcessor] filePath:@"stephaniezylstra" :@"sz.ienv3500"];
     
 }
 
+
+- (void)bgThread:(NSConnection *)connection {
+    
+    NSLog(@"inside new thread (bgThread)");
+    
+    [[[Global _settings] statistics] sessionsForContact:@"stephaniezylstra" :@"sz.ienv3500"];
+    
+    [self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:nil waitUntilDone:NO];
+    
+}
+
+- (void)bgThreadIsDone:(id)obj {
+    
+    NSLog(@"Done");
+}
 
 @end

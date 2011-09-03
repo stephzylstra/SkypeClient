@@ -23,7 +23,6 @@
 }
 
 
-
 - (BOOL) isConversation:(NSString *)line {
     return [line hasPrefix:@"CHAT: "];
 }
