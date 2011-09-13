@@ -20,5 +20,7 @@
 - (void) removeConversationLineAtIndex:(NSInteger)index;
 - (NSString *) getSenderAtLine:(NSInteger)line;
 - (NSString *) getMessageAtLine:(NSInteger)line;
+- (NSDate *) getDateAtLine:(NSInteger)line;
+- (NSInteger) numberOfLines;
 
 @end

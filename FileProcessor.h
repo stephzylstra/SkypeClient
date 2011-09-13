@@ -15,7 +15,7 @@
 @property (copy) NSString *defaultImagePath;
 
 
-- (void) writeToConversation: (NSString *) conversation: (NSString *) loggedInAccount: (NSArray *) conversationLine;
+- (void) writeToConversation:(NSString *)conversation withLoggedInAccount:(NSString *)loggedInAccount conversationLine: (NSArray *) conversationLine;
 - (NSArray *) getConversation: (NSString *) conversation: (NSString *) loggedInAccount;
 - (NSImage *) getAvatar: (NSString *) contact;
 - (BOOL) hasAvatar: (NSString *) contact;

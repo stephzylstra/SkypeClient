@@ -16,10 +16,12 @@
     //NSString *currentConvo;
     NSMutableArray *convoData;
     NSApplication *skypeAppDelegate;
+    NSTableView *generalStats;
 }
 
 - (IBAction)sendChatMessage:(id)sender;
 - (void)dataUpdated;
+@property (assign) IBOutlet NSTableView *generalStats;
 
 
 

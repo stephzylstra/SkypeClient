@@ -12,6 +12,7 @@
 #import "FileProcessor.h"
 
 @implementation GUIController
+@synthesize generalStats;
 
 - (void) dataUpdated {
     //convoRecorded.string = [[Global _settings] convo];
@@ -22,6 +23,8 @@
     if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
         return (int)[[[Global _settings] onlineContacts] count];
 
+    } else if ([[tableView identifier] isEqualToString:@"generalStatistics"]) {
+        return 8; // double spacing
     }
     return (int)[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count];
 }
@@ -39,6 +42,63 @@
         result = [tableView makeViewWithIdentifier:@"contacts" owner:self];
         result.textField.stringValue = [[[Global _settings] onlineContacts] objectAtIndex:row];        
         [result.imageView setImage:[[[Global _settings] fileProcessor] getAvatar:result.textField.stringValue]];
+        
+        
+    } else if ([[tableView identifier] isEqualToString:@"generalStatistics"]) {
+        
+        if ([[tableColumn identifier] isEqualToString:@"statDescription"]) {
+            result = [tableView makeViewWithIdentifier:@"statDescription" owner:self];
+            
+            switch (row) {
+                case 0:
+                    result.textField.stringValue = @"Contact you talk to most:";
+                    break;
+                    
+                case 2:
+                    result.textField.stringValue = @"Average # lines per conversation:";
+                    break;
+                    
+                case 4:
+                    result.textField.stringValue = @"Average response time (seconds):";
+                    break;
+                    
+                case 6:
+                    result.textField.stringValue = @"Average # questions per conversation:";
+                    break;
+                
+                default:
+                    result.textField.stringValue = @"";
+                    break;
+            }
+            
+        } else {
+            result = [tableView makeViewWithIdentifier:@"statData" owner:self];
+            
+            
+            switch (row) {
+                case 0:
+                    result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:@"sz.ienv3500"];
+
+                    break;
+                    
+                case 2:
+                    result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfLines:@"sz.ienv3500"] ];
+
+                    break;
+                    
+                case 4:
+                    result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageResponseTime:@"sz.ienv3500"]];
+                    break;
+                    
+                case 6:
+                    result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfQuestions:@"sz.ienv3500"]];
+                    break;
+                    
+                default:
+                    result.textField.stringValue = @"";
+            }
+        }
+        
     } else {
         
         NSArray *correctConversation = (NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]];
@@ -47,6 +107,7 @@
         if ([[tableColumn identifier] isEqualToString:@"sender"]) {
             result = [tableView makeViewWithIdentifier:@"sender" owner:self];
             result.textField.stringValue = [[correctConversation objectAtIndex:0] objectAtIndex:row];
+            [result.imageView setImage:[[[Global _settings] fileProcessor] getAvatar:result.textField.stringValue]];
         } else {
             result = [tableView makeViewWithIdentifier:@"conversation" owner:self];
             result.textField.stringValue = [[correctConversation objectAtIndex:1] objectAtIndex:row];

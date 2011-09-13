@@ -33,9 +33,7 @@
     }
     
     path = [path stringByAppendingPathComponent:conversation];
-    
-    NSLog(@"Using path: %@", path);
-    
+        
     return path;
 }
 
@@ -50,7 +48,7 @@
 }
 
 
-- (void) writeToConversation: (NSString *) conversation: (NSString *) loggedInAccount: (NSArray *) conversationLine {
+- (void) writeToConversation:(NSString *)conversation withLoggedInAccount:(NSString *)loggedInAccount conversationLine: (NSArray *) conversationLine {
     
     NSString *path = [self filePath:conversation :loggedInAccount];
             
@@ -62,16 +60,20 @@
         [outputHandle seekToEndOfFile];
     }
     
-    NSString *line = [[[[conversationLine objectAtIndex:0] objectAtIndex:0] stringByAppendingString:@": "] stringByAppendingString:[[conversationLine objectAtIndex:1] objectAtIndex:0]];
+    NSDateFormatter *df = [[NSDateFormatter alloc] init];
+    [df setDateFormat:@"dd-MM-yyyy HH:mm"];
     
-    NSLog(@"about to write: %@", line);
+  /*  NSString *line = [[[df stringFromDate:[NSDate date]] stringByAppendingString:@": "] stringByAppendingString:[[[[conversationLine objectAtIndex:0] objectAtIndex:0] stringByAppendingString:@": "] stringByAppendingString:[[conversationLine objectAtIndex:1] objectAtIndex:0]]]; */
     
+    NSString *line = [[df stringFromDate:[NSDate date]] stringByAppendingString:@": "];
+    NSString *sndr = [[conversationLine objectAtIndex:0] objectAtIndex:[[conversationLine objectAtIndex:0] count] -1];
+    NSString *msg = [[conversationLine objectAtIndex:1] objectAtIndex:[[conversationLine objectAtIndex:1] count] -1];
     
+    line = [line stringByAppendingFormat:@"%@: %@", sndr, msg];
+        
    NSData *sending = [line dataUsingEncoding:NSASCIIStringEncoding
                             allowLossyConversion:YES];
     [outputHandle writeData:sending];
-
-    
     
 }
 
@@ -84,11 +86,8 @@
         NSLog(@"Didn't work");
         return nil;
     }
-    
-    NSLog(@"About to read");
-    
+        
     NSString *fileContents = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:NULL];
-    
     NSArray *lines = [fileContents componentsSeparatedByString:@"\n"];
     
     
@@ -96,10 +95,15 @@
                                      initWithObjects:[[NSMutableArray alloc] init],[[NSMutableArray alloc] init], [[NSMutableArray alloc] init], nil];
     
     for (NSInteger i = 0; i < [lines count]; i++) {
+        
+        if ([[lines objectAtIndex:i] isEqualToString:@""]) {
+            continue;
+        }
+        
         NSArray *components = [[lines objectAtIndex:i] componentsSeparatedByString:@": "];
         
         if ([components count] != 3) {
-            NSLog(@"Invalid file");
+            NSLog(@"Invalid file %@ - line %@", path, [lines objectAtIndex:i]);
             return nil;
         }
         
@@ -117,13 +121,13 @@
 - (BOOL) hasAvatar: (NSString *) contact {
     
     // TODO
-    
-   /*NSData *sending = [[[@"lv\n" stringByAppendingString:contact] stringByAppendingString:@"\n"] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+
+  /*NSData *sending = [[[@"lv\n" stringByAppendingString:contact] stringByAppendingString:@"\n"] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
         
-    NSString *rawData = [[NSString alloc] initWithData:[[[Global _settings] readHandle] componentsSeparatedByString:Data] encoding:NSUTF8StringEncoding];
+    NSString *rawData = [[NSString alloc] initWithData:[[[Global _settings] readHandle] availableData] encoding:NSUTF8StringEncoding];
     
-    return [rawData boolValue];*/
+    return [rawData boolValue]; */
     
     return true;
 }

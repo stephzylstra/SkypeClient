@@ -13,10 +13,13 @@
 - (NSArray *) sessionsForContact:(NSString *)contact: (NSString *)loggedInAccountName; // will find actual convo based on conversation parameter and convert that into a list of sessions
 
 
-- (NSArray *) mostFrequentChats:(NSString *) loggedInAccountName;
+- (NSString *) mostFrequentChats:(NSString *) loggedInAccountName;
 - (NSInteger) averageNumberOfLines:(NSString *) loggedInAccountName;
 - (NSDictionary *) percentageOfChatsStarted: (NSString *) loggedInAccountName;
 - (NSInteger) averageResponseTime:(NSString *) loggedInAccountName;
 - (NSInteger) averageNumberOfQuestions:(NSString *) loggedInAccountName;
+- (NSInteger) averageLinesForContact:(NSString *)contact whenLoggedInAs:(NSString *)loggedInAccountName;
+@property (retain) NSMutableDictionary *conversationSessions;
+@property (copy) NSString *loggedIn;
 
 @end

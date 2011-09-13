@@ -11,11 +11,15 @@
 
 
 @implementation SkypeClientAppDelegate
+@synthesize statsGeneral;
+@synthesize convStarter;
 @synthesize username;
 @synthesize password;
 @synthesize _tableview;
 @synthesize window;
 @synthesize _convoTableView;
+@synthesize loggedInUsername;
+@synthesize loggedInImage;
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
@@ -52,6 +56,10 @@
     
     // associate clicks on contact list with a conversation
     [_convoTableView setAction:@selector(chooseConversation:)];
+    
+    NSString *urlText = [NSString stringWithString:@"http://localhost/studio3/conv_started_graph.php?you=20&them=80"];
+    [[convStarter mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlText]]]; 
+    
     
 }
 
@@ -105,6 +113,8 @@
         
         [[Global _settings] addConversation:name:details];
         
+        [[[Global _settings] fileProcessor] writeToConversation:name withLoggedInAccount:@"sz.ienv3500" conversationLine: details];
+        
     } else if ([[[Global _settings] commandProcessor] isLoginCheck:str]) {
         [[Global _settings] setIsLoggedIn:YES];
         [self initialiseAfterLogin];
@@ -136,14 +146,21 @@
                             allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
     
+    [loggedInUsername setStringValue:[username stringValue]];
+
+    //[loginButton setStringValue:@"Logging in..."];
+    
     //[_tableview reloadData];
     
 }
 
 - (void) initialiseAfterLogin {
-    NSLog(@"inside initialise");
     if ([[Global _settings] isLoggedIn]) {
-        sleep(8);
+        sleep(9);
+        
+        NSImage *userImage = [[NSImage alloc] initWithContentsOfFile:[[[@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[loggedInUsername stringValue]] stringByAppendingPathExtension:@"jpg"]];
+                
+        [loggedInImage setImage:userImage];
         [[[Global _settings] commandProcessor] getContacts];
         //[loginWindow orderOut:self];
         
@@ -191,14 +208,10 @@
      
      NSLog(@"%@", rawData);
      
-     // NSLog(@"%@", [@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath]);
-     
-     NSArray *correctConversation = (NSArray *)[[[Global _settings] conversationText] objectForKey:@"echo123"];
-     
-     [[[Global _settings] fileProcessor] writeToConversation:@"test1" :@"test2" :correctConversation];*/
+     // NSLog(@"%@", [@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath]);*/
     
     
-    NSLog(@"Inside test");
+    //NSLog(@"Inside test");
     
     [NSThread detachNewThreadSelector:@selector(bgThread:) toTarget:self withObject:nil];
     
@@ -209,17 +222,25 @@
 
 - (void)bgThread:(NSConnection *)connection {
     
-    NSLog(@"inside new thread (bgThread)");
+    //NSLog(@"inside new thread (bgThread)");
     
-    [[[Global _settings] statistics] sessionsForContact:@"stephaniezylstra" :@"sz.ienv3500"];
+    //[[[Global _settings] statistics] sessionsForContact:@"stephaniezylstra" :@"sz.ienv3500"];
     
-    [self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:nil waitUntilDone:NO];
+    [statsGeneral setEnabled:NO];
+    
+    [statsGeneral reloadData];
+
+    [statsWindow makeKeyAndOrderFront:self];
+
+
+    
+    //[self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:nil waitUntilDone:NO];
     
 }
 
 - (void)bgThreadIsDone:(id)obj {
     
-    NSLog(@"Done");
+    //NSLog(@"Done");
 }
 
 @end
