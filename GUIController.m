@@ -10,9 +10,10 @@
 #import "SkypeClientAppDelegate.h"
 #import "Global.h"
 #import "FileProcessor.h"
+#import "ConversationTableCell.h"
 
 @implementation GUIController
-@synthesize generalStats;
+@synthesize generalStats, popoverController;
 
 - (void) dataUpdated {
     //convoRecorded.string = [[Global _settings] convo];
@@ -36,15 +37,20 @@
                   row:(NSInteger)row {
     
     
-    NSTableCellView *result;
         
     if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
+        NSTableCellView *result;
+
         result = [tableView makeViewWithIdentifier:@"contacts" owner:self];
         result.textField.stringValue = [[[Global _settings] onlineContacts] objectAtIndex:row];        
         [result.imageView setImage:[[[Global _settings] fileProcessor] getAvatar:result.textField.stringValue]];
         
+        return result;
+        
         
     } else if ([[tableView identifier] isEqualToString:@"generalStatistics"]) {
+        
+        NSTableCellView *result;
         
         if ([[tableColumn identifier] isEqualToString:@"statDescription"]) {
             result = [tableView makeViewWithIdentifier:@"statDescription" owner:self];
@@ -99,22 +105,66 @@
             }
         }
         
+        return result;
+        
     } else {
         
         NSArray *correctConversation = (NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]];
         
+
         
         if ([[tableColumn identifier] isEqualToString:@"sender"]) {
+            
+            NSTableCellView *result;
+            
             result = [tableView makeViewWithIdentifier:@"sender" owner:self];
             result.textField.stringValue = [[correctConversation objectAtIndex:0] objectAtIndex:row];
             [result.imageView setImage:[[[Global _settings] fileProcessor] getAvatar:result.textField.stringValue]];
+            
+            //result.multilineText.stringValue = [[correctConversation objectAtIndex:0] objectAtIndex:row];
+            
+            return result;
+                        
         } else {
+            
+            ConversationTableCell *result;
+            
             result = [tableView makeViewWithIdentifier:@"conversation" owner:self];
-            result.textField.stringValue = [[correctConversation objectAtIndex:1] objectAtIndex:row];
+            
+            
+            if ([[[correctConversation objectAtIndex:1] objectAtIndex:row] hasPrefix:@"FILE- "]) {
+                NSArray *fileObjects = [[[[correctConversation objectAtIndex:1] objectAtIndex:row] stringByReplacingOccurrencesOfString:@"FILE- " withString:@""] componentsSeparatedByString:@": "];
+                result.filename.stringValue = [fileObjects objectAtIndex:0];
+                
+                
+                NSString *filePath = [[@"~/Library/Application Support/SkypeClient/Files/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[fileObjects objectAtIndex:0]];
+                
+                
+                if ([[filePath pathExtension] isCaseInsensitiveLike:@"jpg"] || [[filePath pathExtension] isCaseInsensitiveLike:@"png"] || [[filePath pathExtension] isCaseInsensitiveLike:@"gif"]) {                    
+                    [result.imageButton setImage:[[NSImage alloc] initWithContentsOfFile:filePath]];
+                    [result.imageButton setAlternateImage:[[NSImage alloc] initWithContentsOfFile:filePath]];
+
+                    
+                } else {
+                    [result.imageButton setImage:[[[NSFileWrapper alloc] initWithPath:filePath] icon]];
+                    [result.imageButton setAlternateImage:[[[NSFileWrapper alloc] initWithPath:filePath] icon]];
+                }
+                
+            } else {
+            
+            result.multilineText.stringValue = [[correctConversation objectAtIndex:1] objectAtIndex:row]; 
+            [result.imageButton setEnabled:NO];
+            
+            }
+            
+            return result;
+
+            
         }
         //[result.textField sizeToFit];
     }
-    return result;
+    return nil;
+    //return result;
 }
 
 - (id)init {
@@ -122,6 +172,12 @@
     if(self) {
         [[Global _settings] addListener:self];
         skypeAppDelegate = (SkypeClientAppDelegate *) [[NSApplication sharedApplication] delegate];
+        viewController = [[[ContentViewController alloc] initWithNibName:@"ContentViewController" bundle:nil] autorelease];
+        self.popoverController = [[[INPopoverController alloc] initWithContentViewController:viewController] autorelease];
+        self.popoverController.closesWhenPopoverResignsKey = NO;
+        self.popoverController.color = [NSColor colorWithCalibratedWhite:1.0 alpha:0.8];
+        self.popoverController.borderColor = [NSColor blackColor];
+        self.popoverController.borderWidth = 2.0;
     }
     return self;
 }
@@ -152,4 +208,17 @@
 }
 
 
+- (IBAction)loadPopover:(id)sender {
+    
+    NSLog(@"Processing popover");
+    
+    if (self.popoverController.popoverIsVisible) {
+        [self.popoverController closePopover:nil];
+    } else {
+        viewController.imageView.image = ((NSButton *)sender).image;
+        NSRect buttonBounds = [sender bounds];
+        [self.popoverController showPopoverAtPoint:NSMakePoint(NSMidX(buttonBounds), NSMidY(buttonBounds)) inView:sender preferredArrowDirection:INPopoverArrowDirectionUp anchorsToPositionView:YES];
+    }
+    
+}
 @end

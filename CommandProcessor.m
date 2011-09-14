@@ -39,6 +39,18 @@
     return [line hasPrefix:@"SKYPE.CONTACTLIST"];
 }
 
+- (BOOL) isFileTransfer:(NSString *)line {
+    return [line hasPrefix:@"FILE: "];
+}
+
+- (NSString *) getFileSender:(NSString *)line {
+    return [[[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:2] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+}
+
+- (NSString *) getFilename:(NSString *)line {
+    return [[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:1];
+}
+
 
 - (NSString *) getConversationSender:(NSString *) line {
     NSString *sender = [line stringByReplacingOccurrencesOfString:@"CHAT: " withString:@""];

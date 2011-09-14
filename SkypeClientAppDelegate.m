@@ -60,7 +60,6 @@
     NSString *urlText = [NSString stringWithString:@"http://localhost/studio3/conv_started_graph.php?you=20&them=80"];
     [[convStarter mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlText]]]; 
     
-    
 }
 
 -(void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -113,7 +112,7 @@
         
         [[Global _settings] addConversation:name:details];
         
-        [[[Global _settings] fileProcessor] writeToConversation:name withLoggedInAccount:@"sz.ienv3500" conversationLine: details];
+        [[[Global _settings] fileProcessor] writeToConversation:name withLoggedInAccount:[loggedInUsername stringValue] conversationLine: details];
         
     } else if ([[[Global _settings] commandProcessor] isLoginCheck:str]) {
         [[Global _settings] setIsLoggedIn:YES];
@@ -121,6 +120,35 @@
         
     } else if ([[[Global _settings] commandProcessor] isContactListChange:str]) {
         [[[Global _settings] commandProcessor] getContacts];
+        
+    } else if ([[[Global _settings] commandProcessor] isFileTransfer:str]) {
+        
+        NSString *name = [[[Global _settings] commandProcessor] getFilename:str];
+        NSString *sender = [[[Global _settings] commandProcessor] getFileSender:str];
+        
+        
+        /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];*/
+        [NSApp requestUserAttention:NSInformationalRequest];
+                
+        NSArray *details = [[[Global _settings] conversationText] objectForKey:sender];
+                
+        if (details == nil) {
+            details = [[NSArray alloc]
+                       initWithObjects:[[NSMutableArray alloc] init],[[NSMutableArray alloc] init], nil];
+        }
+        
+        
+        [[details objectAtIndex:0] addObject:sender];
+        
+        NSString *message = [@"FILE- " stringByAppendingString:name];
+        
+        [[details objectAtIndex:1] addObject:message];
+        
+        [[Global _settings] addConversation:sender:details];
+        
+        [[[Global _settings] fileProcessor] writeToConversation:sender withLoggedInAccount:[loggedInUsername stringValue] conversationLine: details];
+        
+        
     } else {
         NSLog(@"%@", str);
     }
@@ -157,6 +185,12 @@
 - (void) initialiseAfterLogin {
     if ([[Global _settings] isLoggedIn]) {
         sleep(9);
+        
+        // set up automatic file transfer
+        NSData *sending = [@"ef\n" dataUsingEncoding:NSASCIIStringEncoding
+                                allowLossyConversion:YES];
+        [[[Global _settings] writeHandle] writeData:sending];
+
         
         NSImage *userImage = [[NSImage alloc] initWithContentsOfFile:[[[@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[loggedInUsername stringValue]] stringByAppendingPathExtension:@"jpg"]];
                 
@@ -242,5 +276,6 @@
     
     //NSLog(@"Done");
 }
+
 
 @end

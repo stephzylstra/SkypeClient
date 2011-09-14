@@ -9,8 +9,6 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-
-
 @interface SkypeClientAppDelegate : NSObject <NSApplicationDelegate> {
     NSWindow *window;
     NSTableView *_convoTableView;

@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ContentViewController.h"
+#import "INPopoverController.h"
 
 @interface GUIController : NSObject {
     IBOutlet id button;
@@ -17,11 +19,16 @@
     NSMutableArray *convoData;
     NSApplication *skypeAppDelegate;
     NSTableView *generalStats;
+    ContentViewController *viewController;
 }
 
+@property (assign) IBOutlet NSTableView *generalStats;
+@property (nonatomic, retain) INPopoverController *popoverController;
+
+
+- (IBAction)loadPopover:(id)sender;
 - (IBAction)sendChatMessage:(id)sender;
 - (void)dataUpdated;
-@property (assign) IBOutlet NSTableView *generalStats;
 
 
 

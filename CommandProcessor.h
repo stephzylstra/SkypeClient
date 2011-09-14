@@ -19,5 +19,8 @@
 - (void) getContacts;
 - (BOOL) isLoginCheck:(NSString *) line;
 - (BOOL) isContactListChange:(NSString *) line;
+- (BOOL) isFileTransfer:(NSString *)line;
+- (NSString *) getFileSender:(NSString *)line;
+- (NSString *) getFilename:(NSString *)line;
 
 @end
