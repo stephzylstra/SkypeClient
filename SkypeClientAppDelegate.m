@@ -57,7 +57,15 @@
     // associate clicks on contact list with a conversation
     [_convoTableView setAction:@selector(chooseConversation:)];
     
-    NSString *urlText = [NSString stringWithString:@"http://localhost/studio3/conv_started_graph.php?you=20&them=80"];
+    // tell table view to handle external dragging
+    [_tableview registerForDraggedTypes:
+     [NSArray arrayWithObjects:@"ConversationTableCell", NSFilenamesPboardType, @"public.utf8-plain-text", nil] ];
+    [_tableview setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+    
+    
+
+    
+    NSString *urlText = [NSString stringWithString:@"http://stephaniezylstra.com/private/studio3/conv_started_graph.php?you=20&them=80"];
     [[convStarter mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlText]]]; 
     
 }
@@ -123,14 +131,19 @@
         
     } else if ([[[Global _settings] commandProcessor] isFileTransfer:str]) {
         
-        NSString *name = [[[Global _settings] commandProcessor] getFilename:str];
-        NSString *sender = [[[Global _settings] commandProcessor] getFileSender:str];
+        NSString *trimmed = [str stringByReplacingOccurrencesOfString:@"FILE: " withString:@""];
         
+        NSString *name = [[[Global _settings] commandProcessor] getFilename:trimmed];
+        NSString *sender = [[[Global _settings] commandProcessor] getFileSender:trimmed];
+        NSString *identity = [[[Global _settings] commandProcessor] getFileConversation:trimmed];
+        
+        
+        NSLog(@"Name: %@, Sender: %@, Identity: %@", name, sender, identity);
         
         /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];*/
         [NSApp requestUserAttention:NSInformationalRequest];
                 
-        NSArray *details = [[[Global _settings] conversationText] objectForKey:sender];
+        NSArray *details = [[[Global _settings] conversationText] objectForKey:identity];
                 
         if (details == nil) {
             details = [[NSArray alloc]
@@ -140,13 +153,13 @@
         
         [[details objectAtIndex:0] addObject:sender];
         
-        NSString *message = [@"FILE- " stringByAppendingString:name];
+        NSString *message = [[@"FILE- " stringByAppendingString:name] stringByAppendingString:@"\n"];
         
         [[details objectAtIndex:1] addObject:message];
         
-        [[Global _settings] addConversation:sender:details];
+        [[Global _settings] addConversation:identity:details];
         
-        [[[Global _settings] fileProcessor] writeToConversation:sender withLoggedInAccount:[loggedInUsername stringValue] conversationLine: details];
+        [[[Global _settings] fileProcessor] writeToConversation:identity withLoggedInAccount:[loggedInUsername stringValue] conversationLine: details];
         
         
     } else {
@@ -175,10 +188,7 @@
     [[[Global _settings] writeHandle] writeData:sending];
     
     [loggedInUsername setStringValue:[username stringValue]];
-
-    //[loginButton setStringValue:@"Logging in..."];
-    
-    //[_tableview reloadData];
+    [[Global _settings] setLoggedInAs:[username stringValue]];
     
 }
 
@@ -196,6 +206,7 @@
                 
         [loggedInImage setImage:userImage];
         [[[Global _settings] commandProcessor] getContacts];
+        
         //[loginWindow orderOut:self];
         
         
@@ -229,52 +240,66 @@
 
 
 - (IBAction)test:(id)sender {
-    
-    /* NSLog(@"Should be outputting image");
-     
-     NSData *sending = [@"lv\nstephaniezylstra\n" dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-     
-     [[[Global _settings] writeHandle] writeData:sending];
-     
-     NSString *rawData = [[NSString alloc] initWithData:[[[Global _settings] readHandle] availableData] encoding:NSUTF8StringEncoding];
-     
-     //NSImage *test = [[NSImage alloc] initWithData:[[[Global _settings] readHandle] availableData]];
-     
-     NSLog(@"%@", rawData);
-     
-     // NSLog(@"%@", [@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath]);*/
-    
-    
-    //NSLog(@"Inside test");
-    
+        
     [NSThread detachNewThreadSelector:@selector(bgThread:) toTarget:self withObject:nil];
-    
-    //[[[Global _settings] fileProcessor] filePath:@"stephaniezylstra" :@"sz.ienv3500"];
-    
+        
 }
 
 
 - (void)bgThread:(NSConnection *)connection {
-    
-    //NSLog(@"inside new thread (bgThread)");
-    
-    //[[[Global _settings] statistics] sessionsForContact:@"stephaniezylstra" :@"sz.ienv3500"];
-    
+        
     [statsGeneral setEnabled:NO];
     
     [statsGeneral reloadData];
 
     [statsWindow makeKeyAndOrderFront:self];
-
-
     
-    //[self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:nil waitUntilDone:NO];
+}
+
+- (void)sendFileTransfer:(NSString *)filename {
+            
+    /*NSString *entered = [NSString stringWithFormat:@"fs\n%@\n", [filename stringByStandardizingPath]];
     
+    NSLog(@"%@", entered);*/
+    
+    NSString *entered = [NSString stringWithFormat:@"fs\n%@\n", [filename stringByStandardizingPath]];
+    NSData  *sending = [entered dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+    [[[Global _settings] writeHandle] writeData:sending]; 
+
+    [self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:[NSThread currentThread] waitUntilDone:YES];
 }
 
 - (void)bgThreadIsDone:(id)obj {
     
-    //NSLog(@"Done");
+    /*if (obj != nil) {
+        NSLog(@"BG thread %@ finished", obj);
+    }
+    else {
+        NSLog(@"BG thread finished");
+
+    }*/
+}
+
+- (void)processSearch:(NSString *)searchTerm {
+    NSLog(@"Processing search");
+    
+    [[[Global _settings] searchEngine] performSearch:searchTerm forUser:[loggedInUsername stringValue]];
+     
+     [[[Global _settings] conversationText] setValue:[[[Global _settings] searchEngine] searchResults] forKey:@"search"];
+     
+     [[Global _settings] setCurrentConversation:@"search"];
+     
+     [_tableview reloadData];
+        
+}
+
+- (IBAction)doSearch:(id)sender {
+    
+    NSLog(@"Searching for %@", [sender stringValue]);
+    if (![[sender stringValue] isEqualToString:@""]) {
+        [NSThread detachNewThreadSelector:@selector(processSearch:) toTarget:self withObject:[sender stringValue]];
+
+    }
 }
 
 

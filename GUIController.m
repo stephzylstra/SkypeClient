@@ -15,6 +15,20 @@
 @implementation GUIController
 @synthesize generalStats, popoverController;
 
+- (id)init {
+    self = [super init];
+    if(self) {
+        [[Global _settings] addListener:self];
+        viewController = [[ContentViewController alloc] initWithNibName:@"ContentViewController" bundle:nil];
+        self.popoverController = [[INPopoverController alloc] initWithContentViewController:viewController];
+        self.popoverController.closesWhenPopoverResignsKey = YES;
+        self.popoverController.color = [NSColor colorWithCalibratedWhite:1.0 alpha:0.8];
+        self.popoverController.borderColor = [NSColor blackColor];
+        self.popoverController.borderWidth = 1.0;
+    }
+    return self;
+}
+
 - (void) dataUpdated {
     //convoRecorded.string = [[Global _settings] convo];
 }
@@ -31,13 +45,10 @@
 }
 
 
-
 - (NSView *)tableView:(NSTableView *)tableView
    viewForTableColumn:(NSTableColumn *)tableColumn
                   row:(NSInteger)row {
-    
-    
-        
+            
     if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
         NSTableCellView *result;
 
@@ -81,28 +92,30 @@
             result = [tableView makeViewWithIdentifier:@"statData" owner:self];
             
             
-            switch (row) {
-                case 0:
-                    result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:@"sz.ienv3500"];
+            if ([[Global _settings] loggedInAs] != NULL && [[Global _settings] loggedInAs] != nil) {
+                switch (row) {
+                    case 0:
+                        result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]];
+                        break;
+                        
+                    case 2:
+                        result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfLines:[[Global _settings] loggedInAs]]];
+                        break;
+                        
+                    case 4:
+                        result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageResponseTime:[[Global _settings] loggedInAs]]];
+                        break;
+                        
+                    case 6:
+                        result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfQuestions:[[Global _settings] loggedInAs]]];
+                        break;
+                        
+                    default:
+                        result.textField.stringValue = @"";
+                }
 
-                    break;
-                    
-                case 2:
-                    result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfLines:@"sz.ienv3500"] ];
-
-                    break;
-                    
-                case 4:
-                    result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageResponseTime:@"sz.ienv3500"]];
-                    break;
-                    
-                case 6:
-                    result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfQuestions:@"sz.ienv3500"]];
-                    break;
-                    
-                default:
-                    result.textField.stringValue = @"";
             }
+            
         }
         
         return result;
@@ -110,8 +123,6 @@
     } else {
         
         NSArray *correctConversation = (NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]];
-        
-
         
         if ([[tableColumn identifier] isEqualToString:@"sender"]) {
             
@@ -131,13 +142,56 @@
             
             result = [tableView makeViewWithIdentifier:@"conversation" owner:self];
             
+            NSMutableAttributedString * test = [[NSMutableAttributedString alloc] init];
+            
+            NSRange range;
+            NSString *textLine = [NSString stringWithString:[[correctConversation objectAtIndex:1] objectAtIndex:row]];
+            
+            [[[Global _settings] commandProcessor] getEmoticonRangeFromLine:textLine usingRange:&range];
+                        
+            while (range.location != NSNotFound) {
+                NSRange start = [[textLine substringWithRange:range] rangeOfString:@"\""];
+                                
+                [test appendAttributedString:[[NSAttributedString alloc] initWithString:[textLine substringToIndex:range.location]]];
+                
+                NSRange end = [[[textLine substringWithRange:range] substringFromIndex:start.location + 1]
+ rangeOfString:@"\""];
+                                
+                NSRange emoticonNameRange = NSMakeRange(start.location + 1, end.location);
+
+                NSString *emoticonName = [[textLine substringWithRange:range] substringWithRange:emoticonNameRange];
+                NSString *filePath = [[NSString stringWithFormat:@"~/Library/Application Support/SkypeClient/emoticons/%@_20.png", emoticonName] stringByExpandingTildeInPath];
+                
+                NSTextAttachment *ta = [[NSTextAttachment alloc] init];
+                NSTextAttachmentCell *tac = [[NSTextAttachmentCell alloc] init];
+                [tac setImage:[[NSImage alloc] initWithContentsOfFile:filePath]];
+                [ta setAttachmentCell:tac];
+                NSAttributedString *imgStr = [NSAttributedString attributedStringWithAttachment:ta];
+                [test appendAttributedString:imgStr];
+                
+                textLine = [textLine stringByReplacingCharactersInRange:NSMakeRange(0, range.location + range.length) withString:@""];
+                [[[Global _settings] commandProcessor] getEmoticonRangeFromLine:textLine usingRange:&range];                
+            }
+            
+            [test appendAttributedString:[[NSAttributedString alloc] initWithString:textLine]];
             
             if ([[[correctConversation objectAtIndex:1] objectAtIndex:row] hasPrefix:@"FILE- "]) {
+                
                 NSArray *fileObjects = [[[[correctConversation objectAtIndex:1] objectAtIndex:row] stringByReplacingOccurrencesOfString:@"FILE- " withString:@""] componentsSeparatedByString:@": "];
                 result.filename.stringValue = [fileObjects objectAtIndex:0];
                 
+                NSString *filePath;
                 
-                NSString *filePath = [[@"~/Library/Application Support/SkypeClient/Files/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[fileObjects objectAtIndex:0]];
+                if ([[[correctConversation objectAtIndex:0] objectAtIndex:row] isEqualToString:[[Global _settings] loggedInAs]]) {
+                    NSLog(@"equal");
+                    filePath = [fileObjects objectAtIndex:0];
+                    filePath = [filePath stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+                } else {
+                    filePath = [[@"~/Library/Application Support/SkypeClient/Files/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[[fileObjects objectAtIndex:0] stringByReplacingOccurrencesOfString:@"\n" withString:@""]];
+
+                }
+                
+                NSLog(@"%@", filePath);
                 
                 
                 if ([[filePath pathExtension] isCaseInsensitiveLike:@"jpg"] || [[filePath pathExtension] isCaseInsensitiveLike:@"png"] || [[filePath pathExtension] isCaseInsensitiveLike:@"gif"]) {                    
@@ -150,10 +204,16 @@
                     [result.imageButton setAlternateImage:[[[NSFileWrapper alloc] initWithPath:filePath] icon]];
                 }
                 
+                [result setMode:FILE_MODE];
+                
             } else {
             
-            result.multilineText.stringValue = [[correctConversation objectAtIndex:1] objectAtIndex:row]; 
+            //result.multilineText.stringValue = [[correctConversation objectAtIndex:1] objectAtIndex:row]; 
+                
+            [result.multilineText setAttributedStringValue:test];
             [result.imageButton setEnabled:NO];
+                
+            [result setMode:TEXT_MODE];
             
             }
             
@@ -167,20 +227,7 @@
     //return result;
 }
 
-- (id)init {
-    self = [super init];
-    if(self) {
-        [[Global _settings] addListener:self];
-        skypeAppDelegate = (SkypeClientAppDelegate *) [[NSApplication sharedApplication] delegate];
-        viewController = [[[ContentViewController alloc] initWithNibName:@"ContentViewController" bundle:nil] autorelease];
-        self.popoverController = [[[INPopoverController alloc] initWithContentViewController:viewController] autorelease];
-        self.popoverController.closesWhenPopoverResignsKey = NO;
-        self.popoverController.color = [NSColor colorWithCalibratedWhite:1.0 alpha:0.8];
-        self.popoverController.borderColor = [NSColor blackColor];
-        self.popoverController.borderWidth = 2.0;
-    }
-    return self;
-}
+
 
 - (void)dealloc {
     [[Global _settings] removeListener:self];
@@ -208,10 +255,42 @@
 }
 
 
+- (BOOL)   tableView:(NSTableView *)pTableView 
+writeRowsWithIndexes:(NSIndexSet *)pIndexSetOfRows 
+        toPasteboard:(NSPasteboard*)pboard {
+    return YES;
+}
+
+
+- (NSDragOperation)tableView:(NSTableView*)pTableView 
+                validateDrop:(id )info 
+                 proposedRow:(NSInteger)row 
+       proposedDropOperation:(NSTableViewDropOperation)op {
+       return NSDragOperationEvery;
+}
+
+- (BOOL)tableView:(NSTableView *)pTableView 
+       acceptDrop:(id )info
+              row:(NSInteger)pRow 
+    dropOperation:(NSTableViewDropOperation)operation {
+        
+    NSPasteboard *pasteboard = [info draggingPasteboard];    
+    NSArray *filenames = [pasteboard propertyListForType:NSFilenamesPboardType];  
+    
+    for (NSString *filename in filenames) {
+        
+        [NSThread detachNewThreadSelector:@selector(sendFileTransfer:) toTarget:[[NSApplication sharedApplication] delegate] withObject:filename];
+
+    }
+    
+    //NSArray *filenames = 
+    
+    return YES;
+}
+
+
 - (IBAction)loadPopover:(id)sender {
-    
-    NSLog(@"Processing popover");
-    
+        
     if (self.popoverController.popoverIsVisible) {
         [self.popoverController closePopover:nil];
     } else {

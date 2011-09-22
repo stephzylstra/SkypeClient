@@ -12,7 +12,7 @@
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn;
+@synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn, searchEngine, loggedInAs;
 
 + (Global *) _settings
 {
@@ -40,6 +40,8 @@ static Global* _settings = nil;
         self.writePipe = [NSPipe pipe];
         self.fileProcessor = [[FileProcessor alloc] init];
         self.statistics = [[Statistics alloc] init];
+        self.searchEngine = [[SearchEngine alloc] init];
+        self.loggedInAs = @"";
     }
     return self;
 }
@@ -193,7 +195,6 @@ static NSMutableArray *listeners;
 }
 
 + (void) flush {
-    NSLog(@"GOING THROUGH STUFF %d",[listeners count]);
     for(int i=0; i<[listeners count]; i++) {
         [(GUIController *)[listeners objectAtIndex:i] newDataArrived];
     }
@@ -202,8 +203,6 @@ static NSMutableArray *listeners;
 + (void)addListener:(id)object {
     //NSMutableArray *jojo = [[NSMutableArray alloc] init];
     [listeners addObject:@""];
-    NSLog(@"ADDED LISTENER");
-    NSLog(@"NEW COUNT %lu",[listeners count]);
 }
 
 + (void)removeListener:(id)object {

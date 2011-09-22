@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "ContentViewController.h"
 #import "INPopoverController.h"
+#import "SkypeClientAppDelegate.h"
+
 
 @interface GUIController : NSObject {
     IBOutlet id button;
@@ -17,7 +19,6 @@
     IBOutlet NSTextView *convoRecorded;
     //NSString *currentConvo;
     NSMutableArray *convoData;
-    NSApplication *skypeAppDelegate;
     NSTableView *generalStats;
     ContentViewController *viewController;
 }

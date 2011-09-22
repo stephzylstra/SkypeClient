@@ -10,15 +10,28 @@
 
 @interface Statistics : NSObject
 
-- (NSArray *) sessionsForContact:(NSString *)contact: (NSString *)loggedInAccountName; // will find actual convo based on conversation parameter and convert that into a list of sessions
+// will find actual convo based on conversation parameter and convert that into a list of sessions
+- (NSArray *) sessionsForContact:(NSString *)contact: (NSString *)loggedInAccountName;
 
+// find contact you chat to most
+- (NSString *)mostFrequentChats:(NSString *) loggedInAccountName;
 
-- (NSString *) mostFrequentChats:(NSString *) loggedInAccountName;
+// average number of lines per conversation overall (not per contact)
 - (NSInteger) averageNumberOfLines:(NSString *) loggedInAccountName;
-- (NSDictionary *) percentageOfChatsStarted: (NSString *) loggedInAccountName;
+
+// percentage that you have started conversations with each contact
+- (NSDictionary *) percentageOfChatsStarted: (NSString *) loggedInAccountName; 
+
+// average response time overall
 - (NSInteger) averageResponseTime:(NSString *) loggedInAccountName;
+
+// average number of questions overall
 - (NSInteger) averageNumberOfQuestions:(NSString *) loggedInAccountName;
+
+// average length of each conversation (in lines) with the specific contact
 - (NSInteger) averageLinesForContact:(NSString *)contact whenLoggedInAs:(NSString *)loggedInAccountName;
+
+
 @property (retain) NSMutableDictionary *conversationSessions;
 @property (copy) NSString *loggedIn;
 

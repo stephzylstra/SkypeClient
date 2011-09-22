@@ -43,12 +43,16 @@
     return [line hasPrefix:@"FILE: "];
 }
 
+- (NSString *) getFileConversation:(NSString *)line {
+        return [[[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:1] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+}
+
 - (NSString *) getFileSender:(NSString *)line {
-    return [[[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:2] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+    return [[[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:0] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
 }
 
 - (NSString *) getFilename:(NSString *)line {
-    return [[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:1];
+    return [[[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:2] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
 }
 
 
@@ -104,6 +108,21 @@
     
     [((SkypeClientAppDelegate *)appDelegate)._convoTableView reloadData];
     
+}
+
+- (void) getEmoticonRangeFromLine:(NSString *)line usingRange:(NSRangePointer)range {
+        
+    NSRange startRange = [line rangeOfString:@"<ss"];
+    NSRange endRange = [line rangeOfString:@"</ss>"];
+    
+    if (startRange.location != NSNotFound && endRange.location != NSNotFound) {
+        NSRange newRange = NSUnionRange(startRange, endRange);
+        range->location = newRange.location;
+        range->length = newRange.length;
+    } else {
+        range->location = NSNotFound;
+        range->length = 0;
+    }
 }
 
 

@@ -269,7 +269,7 @@
     
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/Users/stephaniezylstra/Library/Application Support/SkypeClient/sz.ienv3500" error:NULL];
     
-    NSInteger totalResponseTime = 0;
+    unsigned long totalResponseTime = 0;
     NSInteger numLines = 0;
     
     // make sure we are comparing all contacts
@@ -310,7 +310,9 @@
             }
         }
     }
-    return ((double) totalResponseTime / (double) numLines);
+    
+    NSLog(@"%lu", totalResponseTime);
+    return ((double) totalResponseTime / numLines);
 }
 
 

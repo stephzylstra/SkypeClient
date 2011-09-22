@@ -46,5 +46,9 @@
 - (void)bgThreadIsDone:(id)obj;
 - (void)bgThread:(NSConnection *)connection;
 - (void) processStdoutData:(NSNotification *) notification;
+- (IBAction)doSearch:(id)sender;
+- (void)processSearch:(NSString *)searchTerm;
+- (void)sendFileTransfer:(NSString *)filename;
+
 
 @end

@@ -11,6 +11,7 @@
 #import "CommandProcessor.h"
 #import "Statistics.h"
 #import "FileProcessor.h"
+#import "SearchEngine.h"
 
 
 @interface Global : NSObject {
@@ -19,6 +20,7 @@
     CommandProcessor *_commandProcessor;
     FileProcessor *fp;
     Statistics *_statistics;
+    SearchEngine *_se;
 }
 
 +(Global *)_settings;
@@ -30,10 +32,12 @@
 @property (retain) CommandProcessor *commandProcessor;
 @property (retain) FileProcessor *fileProcessor;
 @property (retain) Statistics *statistics;
+@property (retain) SearchEngine *searchEngine;
 @property NSInteger sentCount;
 @property (retain) NSMutableDictionary *conversationText;
 @property (copy) NSString *currentConversation;
 @property BOOL isLoggedIn;
+@property (retain) NSString *loggedInAs;
 
 - (NSFileHandle *)readHandle;
 - (NSFileHandle *)writeHandle;
