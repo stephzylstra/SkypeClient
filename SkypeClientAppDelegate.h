@@ -23,20 +23,39 @@
     NSLock *lock;
     NSTableView *statsGeneral;
     WebView *convStarter;
+    NSTextField *individualAverageLines;
+    NSTextField *individualResponseTimeYou;
+    NSTextField *individualResponseTimeThem;
     IBOutlet NSWindow *statsWindow;
+    NSComboBox *selectContact;
+    NSTextField *individualLastConversation;
 }
 
-@property (assign) IBOutlet NSTableView *statsGeneral;
+// for individual statistics
+@property (assign) IBOutlet NSComboBox *selectContact;
+@property (assign) IBOutlet NSTextField *individualLastConversation;
 @property (assign) IBOutlet WebView *convStarter;
+@property (assign) IBOutlet NSTextField *individualAverageLines;
+@property (assign) IBOutlet NSTextField *individualResponseTimeYou;
+@property (assign) IBOutlet NSTextField *individualResponseTimeThem;
 
+// table views
+@property (assign) IBOutlet NSTableView *statsGeneral;
+@property (retain) IBOutlet NSTableView *_convoTableView;
+@property (retain) IBOutlet NSTableView *_tableview;
+
+// logging in
 @property (assign) IBOutlet NSTextField *username;
 @property (assign) IBOutlet NSSecureTextField *password;
-@property (retain) IBOutlet NSTableView *_tableview;
-@property (assign) IBOutlet NSWindow *window;
-@property (retain) IBOutlet NSTableView *_convoTableView;
 
+// main window
+@property (assign) IBOutlet NSWindow *window;
+
+// current user
 @property (assign) IBOutlet NSTextField *loggedInUsername;
 @property (assign) IBOutlet NSImageCell *loggedInImage;
+
+
 
 - (IBAction)test:(id)sender;
 - (void)stdoutDataAvailable:(NSNotification *)notification;

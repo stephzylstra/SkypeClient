@@ -37,21 +37,18 @@
     
     if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
         return (int)[[[Global _settings] onlineContacts] count];
-
+        
     } else if ([[tableView identifier] isEqualToString:@"generalStatistics"]) {
         return 8; // double spacing
     }
     return (int)[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count];
 }
 
-
-- (NSView *)tableView:(NSTableView *)tableView
-   viewForTableColumn:(NSTableColumn *)tableColumn
-                  row:(NSInteger)row {
-            
+- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
+    
     if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
         NSTableCellView *result;
-
+        
         result = [tableView makeViewWithIdentifier:@"contacts" owner:self];
         result.textField.stringValue = [[[Global _settings] onlineContacts] objectAtIndex:row];        
         [result.imageView setImage:[[[Global _settings] fileProcessor] getAvatar:result.textField.stringValue]];
@@ -82,7 +79,7 @@
                 case 6:
                     result.textField.stringValue = @"Average # questions per conversation:";
                     break;
-                
+                    
                 default:
                     result.textField.stringValue = @"";
                     break;
@@ -95,15 +92,31 @@
             if ([[Global _settings] loggedInAs] != NULL && [[Global _settings] loggedInAs] != nil) {
                 switch (row) {
                     case 0:
-                        result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]];
+                        if ([[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]] != nil) {
+                            result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]];
+                            } else {
+                                NSLog(@"mostFrequentChats is nil");
+                                result.textField.stringValue = @"";
+                            }
+                        //result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]];
                         break;
                         
                     case 2:
+                        if ([NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfLines:[[Global _settings] loggedInAs]]] != nil) {
                         result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfLines:[[Global _settings] loggedInAs]]];
+                        } else {
+                            NSLog(@"averageNumberOfLines is nil");
+                            result.textField.stringValue = @"";
+                        }
                         break;
                         
                     case 4:
+                        if ([[[Global _settings] statistics] averageResponseTime:[[Global _settings] loggedInAs]] != 0) {
                         result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageResponseTime:[[Global _settings] loggedInAs]]];
+                } else {
+                    NSLog(@"averageResponseTime is nil");
+                    result.textField.stringValue = @"";
+                }
                         break;
                         
                     case 6:
@@ -113,7 +126,7 @@
                     default:
                         result.textField.stringValue = @"";
                 }
-
+                
             }
             
         }
@@ -135,7 +148,7 @@
             //result.multilineText.stringValue = [[correctConversation objectAtIndex:0] objectAtIndex:row];
             
             return result;
-                        
+            
         } else {
             
             ConversationTableCell *result;
@@ -148,17 +161,17 @@
             NSString *textLine = [NSString stringWithString:[[correctConversation objectAtIndex:1] objectAtIndex:row]];
             
             [[[Global _settings] commandProcessor] getEmoticonRangeFromLine:textLine usingRange:&range];
-                        
+            
             while (range.location != NSNotFound) {
                 NSRange start = [[textLine substringWithRange:range] rangeOfString:@"\""];
-                                
+                
                 [test appendAttributedString:[[NSAttributedString alloc] initWithString:[textLine substringToIndex:range.location]]];
                 
                 NSRange end = [[[textLine substringWithRange:range] substringFromIndex:start.location + 1]
- rangeOfString:@"\""];
-                                
+                               rangeOfString:@"\""];
+                
                 NSRange emoticonNameRange = NSMakeRange(start.location + 1, end.location);
-
+                
                 NSString *emoticonName = [[textLine substringWithRange:range] substringWithRange:emoticonNameRange];
                 NSString *filePath = [[NSString stringWithFormat:@"~/Library/Application Support/SkypeClient/emoticons/%@_20.png", emoticonName] stringByExpandingTildeInPath];
                 
@@ -183,22 +196,16 @@
                 NSString *filePath;
                 
                 if ([[[correctConversation objectAtIndex:0] objectAtIndex:row] isEqualToString:[[Global _settings] loggedInAs]]) {
-                    NSLog(@"equal");
                     filePath = [fileObjects objectAtIndex:0];
                     filePath = [filePath stringByReplacingOccurrencesOfString:@"\n" withString:@""];
                 } else {
                     filePath = [[@"~/Library/Application Support/SkypeClient/Files/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[[fileObjects objectAtIndex:0] stringByReplacingOccurrencesOfString:@"\n" withString:@""]];
-
+                    
                 }
-                
-                NSLog(@"%@", filePath);
-                
                 
                 if ([[filePath pathExtension] isCaseInsensitiveLike:@"jpg"] || [[filePath pathExtension] isCaseInsensitiveLike:@"png"] || [[filePath pathExtension] isCaseInsensitiveLike:@"gif"]) {                    
                     [result.imageButton setImage:[[NSImage alloc] initWithContentsOfFile:filePath]];
                     [result.imageButton setAlternateImage:[[NSImage alloc] initWithContentsOfFile:filePath]];
-
-                    
                 } else {
                     [result.imageButton setImage:[[[NSFileWrapper alloc] initWithPath:filePath] icon]];
                     [result.imageButton setAlternateImage:[[[NSFileWrapper alloc] initWithPath:filePath] icon]];
@@ -207,27 +214,21 @@
                 [result setMode:FILE_MODE];
                 
             } else {
-            
-            //result.multilineText.stringValue = [[correctConversation objectAtIndex:1] objectAtIndex:row]; 
                 
-            [result.multilineText setAttributedStringValue:test];
-            [result.imageButton setEnabled:NO];
+                [result.multilineText setAttributedStringValue:test];
+                [result.imageButton setEnabled:NO];
                 
-            [result setMode:TEXT_MODE];
-            
+                [result setMode:TEXT_MODE];
+                
             }
             
             return result;
-
+            
             
         }
-        //[result.textField sizeToFit];
     }
     return nil;
-    //return result;
 }
-
-
 
 - (void)dealloc {
     [[Global _settings] removeListener:self];
@@ -235,7 +236,6 @@
 }
 
 - (IBAction)sendChatMessage:(id)sender {
-    
     
     if ([[text stringValue] isEqualToString:@""]) {
         return;
@@ -248,49 +248,31 @@
                              allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
     
-    [text setStringValue:@""];
-    
-    //[[[Global _settings] commandProcessor] getContacts];
-    
+    [text setStringValue:@""];    
 }
 
-
-- (BOOL)   tableView:(NSTableView *)pTableView 
-writeRowsWithIndexes:(NSIndexSet *)pIndexSetOfRows 
-        toPasteboard:(NSPasteboard*)pboard {
+- (BOOL)tableView:(NSTableView *)pTableView writeRowsWithIndexes:(NSIndexSet *)pIndexSetOfRows toPasteboard:(NSPasteboard*)pboard {
     return YES;
 }
 
-
-- (NSDragOperation)tableView:(NSTableView*)pTableView 
-                validateDrop:(id )info 
-                 proposedRow:(NSInteger)row 
-       proposedDropOperation:(NSTableViewDropOperation)op {
-       return NSDragOperationEvery;
+- (NSDragOperation)tableView:(NSTableView*)pTableView validateDrop:(id )info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)op {
+    return NSDragOperationEvery;
 }
 
-- (BOOL)tableView:(NSTableView *)pTableView 
-       acceptDrop:(id )info
-              row:(NSInteger)pRow 
-    dropOperation:(NSTableViewDropOperation)operation {
-        
+- (BOOL)tableView:(NSTableView *)pTableView acceptDrop:(id )info row:(NSInteger)pRow dropOperation:(NSTableViewDropOperation)operation {
+    
     NSPasteboard *pasteboard = [info draggingPasteboard];    
     NSArray *filenames = [pasteboard propertyListForType:NSFilenamesPboardType];  
     
     for (NSString *filename in filenames) {
-        
         [NSThread detachNewThreadSelector:@selector(sendFileTransfer:) toTarget:[[NSApplication sharedApplication] delegate] withObject:filename];
-
     }
-    
-    //NSArray *filenames = 
     
     return YES;
 }
 
-
 - (IBAction)loadPopover:(id)sender {
-        
+    
     if (self.popoverController.popoverIsVisible) {
         [self.popoverController closePopover:nil];
     } else {

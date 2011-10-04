@@ -11,8 +11,13 @@
 
 
 @implementation SkypeClientAppDelegate
+@synthesize selectContact;
+@synthesize individualLastConversation;
 @synthesize statsGeneral;
 @synthesize convStarter;
+@synthesize individualAverageLines;
+@synthesize individualResponseTimeYou;
+@synthesize individualResponseTimeThem;
 @synthesize username;
 @synthesize password;
 @synthesize _tableview;
@@ -63,6 +68,7 @@
     [_tableview setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statisticsSelectionUpdated:) name:NSComboBoxSelectionDidChangeNotification object:nil];
 
     
     NSString *urlText = [NSString stringWithString:@"http://stephaniezylstra.com/private/studio3/conv_started_graph.php?you=20&them=80"];
@@ -82,6 +88,39 @@
     
 }
 
+- (void)statisticsSelectionUpdated:(NSNotification *)notification {
+    NSLog(@"%@", [self.selectContact objectValueOfSelectedItem]);
+    
+    NSDateFormatter *df = [[NSDateFormatter alloc] init];
+    [df setDoesRelativeDateFormatting:YES];
+    [df setAMSymbol:@"am"];
+    [df setPMSymbol:@"pm"];
+    [df setDateStyle:NSDateFormatterShortStyle];
+    [df setTimeStyle:NSDateFormatterShortStyle];
+        
+    [individualLastConversation setStringValue:[NSString stringWithFormat:@"Last conversation: %@", [df stringFromDate:[[[Global _settings] statistics] lastMessageTimeForContact:[self.selectContact objectValueOfSelectedItem] whenLoggedInAs:[[Global _settings] loggedInAs]]]]];
+        
+    [individualAverageLines setStringValue:[NSString stringWithFormat:@"Lines: %u", [[[Global _settings] statistics] averageLinesForContact:[selectContact objectValueOfSelectedItem] whenLoggedInAs:[[Global _settings] loggedInAs]]]];
+        
+    NSArray *responseTimes = [[[Global _settings] statistics] averageResponseTimeForContact:[self.selectContact objectValueOfSelectedItem] whenLoggedInAs:[[Global _settings] loggedInAs]];
+        
+    [individualResponseTimeYou setStringValue:[NSString stringWithFormat:@"You: %@", [[[Global _settings] statistics] stringFromTime:[[responseTimes objectAtIndex:0] longLongValue]]]];
+    
+    [individualResponseTimeThem setStringValue:[NSString stringWithFormat:@"Them: %@", [[[Global _settings] statistics] stringFromTime:[[responseTimes objectAtIndex:1] longLongValue]]]];
+    
+
+    
+    NSNumber *percentageYouHaveStarted = [[[[Global _settings] statistics] percentageOfChatsStarted: [[Global _settings] loggedInAs]] objectForKey:[self.selectContact objectValueOfSelectedItem]];
+    
+    NSInteger percentageTheyHaveStarted = 100 - [percentageYouHaveStarted intValue];
+    
+    NSString *urlText = [NSString stringWithFormat:@"http://stephaniezylstra.com/private/studio3/conv_started_graph.php?you=%u&them=%u", [percentageYouHaveStarted intValue], percentageTheyHaveStarted];
+    
+    NSLog(@"URL text is %@", urlText);
+    
+    [[convStarter mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlText]]]; 
+}
+
 - (void)stdoutDataAvailable:(NSNotification *)notification {
 
     NSFileHandle *handle = (NSFileHandle *)[((NSNotification *)notification) object];
@@ -94,7 +133,6 @@
     [self performSelectorOnMainThread:@selector(processStdoutData:) withObject:str waitUntilDone:NO];
 
 }
-
 
 - (void) processStdoutData:(NSString *)str {
     
@@ -138,8 +176,6 @@
         NSString *identity = [[[Global _settings] commandProcessor] getFileConversation:trimmed];
         
         
-        NSLog(@"Name: %@, Sender: %@, Identity: %@", name, sender, identity);
-        
         /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];*/
         [NSApp requestUserAttention:NSInformationalRequest];
                 
@@ -172,14 +208,14 @@
         [_tableview scrollRowToVisible:[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] - 1];
     }
     [_convoTableView reloadData];
+    [statsGeneral reloadData];
+
     
     [self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:nil waitUntilDone:NO];
 
 }
 
-
 - (IBAction)doLogin:(id)sender {
-    
     
     NSString *command = [[[[@"aL\n" stringByAppendingString:[username stringValue]] stringByAppendingString:@"\n"] stringByAppendingString:[password stringValue]] stringByAppendingString:@"\n"];
     
@@ -187,8 +223,8 @@
                             allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
     
-    [loggedInUsername setStringValue:[username stringValue]];
     [[Global _settings] setLoggedInAs:[username stringValue]];
+    [loggedInUsername setStringValue:[username stringValue]];
     
 }
 
@@ -216,7 +252,6 @@
     }
 }
 
-
 - (void) chooseConversation:(id)sender {
     
     if (sender == _convoTableView && [_convoTableView selectedRow] < [[[Global _settings] onlineContacts] count]) {
@@ -238,13 +273,11 @@
     
 }
 
-
 - (IBAction)test:(id)sender {
         
     [NSThread detachNewThreadSelector:@selector(bgThread:) toTarget:self withObject:nil];
         
 }
-
 
 - (void)bgThread:(NSConnection *)connection {
         
@@ -257,10 +290,6 @@
 }
 
 - (void)sendFileTransfer:(NSString *)filename {
-            
-    /*NSString *entered = [NSString stringWithFormat:@"fs\n%@\n", [filename stringByStandardizingPath]];
-    
-    NSLog(@"%@", entered);*/
     
     NSString *entered = [NSString stringWithFormat:@"fs\n%@\n", [filename stringByStandardizingPath]];
     NSData  *sending = [entered dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];

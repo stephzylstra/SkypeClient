@@ -31,6 +31,15 @@
 // average length of each conversation (in lines) with the specific contact
 - (NSInteger) averageLinesForContact:(NSString *)contact whenLoggedInAs:(NSString *)loggedInAccountName;
 
+// time of last conversation with this particular contact
+- (NSDate *) lastMessageTimeForContact:(NSString *)contact whenLoggedInAs:(NSString *)loggedInAccountName;
+
+// average response time with a particular contact - with you/them times
+- (NSArray *) averageResponseTimeForContact:(NSString *)contact whenLoggedInAs:(NSString *)loggedInAccountName;
+
+// helper method for returning human-readable times
+- (NSString *) stringFromTime:(double)time;
+
 
 @property (retain) NSMutableDictionary *conversationSessions;
 @property (copy) NSString *loggedIn;
