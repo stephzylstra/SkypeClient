@@ -8,6 +8,7 @@
 
 #import "SkypeClientAppDelegate.h"
 #import "Global.h"
+#import <unistd.h>
 
 
 @implementation SkypeClientAppDelegate
@@ -21,6 +22,7 @@
 @synthesize username;
 @synthesize password;
 @synthesize _tableview;
+@synthesize loginButton;
 @synthesize window;
 @synthesize _convoTableView;
 @synthesize loggedInUsername;
@@ -208,6 +210,13 @@
         [_tableview scrollRowToVisible:[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] - 1];
     }
     [_convoTableView reloadData];
+    
+    [_convoTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+    
+    [_convoTableView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleRegular];
+
+    
+    
     [statsGeneral reloadData];
 
     
@@ -216,6 +225,10 @@
 }
 
 - (IBAction)doLogin:(id)sender {
+    
+    //[self.loginButton setStringValue:@"Logging in..."];
+    [self.loginButton setTitle:@"Logging in..."];
+    [self.loginButton setEnabled:NO];
     
     NSString *command = [[[[@"aL\n" stringByAppendingString:[username stringValue]] stringByAppendingString:@"\n"] stringByAppendingString:[password stringValue]] stringByAppendingString:@"\n"];
     
@@ -230,7 +243,7 @@
 
 - (void) initialiseAfterLogin {
     if ([[Global _settings] isLoggedIn]) {
-        sleep(9);
+        sleep(2);
         
         // set up automatic file transfer
         NSData *sending = [@"ef\n" dataUsingEncoding:NSASCIIStringEncoding
@@ -241,6 +254,9 @@
         NSImage *userImage = [[NSImage alloc] initWithContentsOfFile:[[[@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[loggedInUsername stringValue]] stringByAppendingPathExtension:@"jpg"]];
                 
         [loggedInImage setImage:userImage];
+        
+        
+        
         [[[Global _settings] commandProcessor] getContacts];
         
         //[loginWindow orderOut:self];
@@ -248,6 +264,10 @@
         
         [loginWindow close];
         [window makeKeyAndOrderFront:self];
+        
+        
+        
+        
         //[NSApp activateIgnoringOtherApps:YES];
     }
 }
@@ -255,6 +275,8 @@
 - (void) chooseConversation:(id)sender {
     
     if (sender == _convoTableView && [_convoTableView selectedRow] < [[[Global _settings] onlineContacts] count]) {
+        
+        [[Global _settings] setSelectedContact:[_convoTableView selectedRow]];
         
         NSString *conversation = (NSString *)[[[Global _settings] onlineContacts] objectAtIndex:[_convoTableView selectedRow]];
         
@@ -267,6 +289,8 @@
         [[Global _settings] setCurrentConversation:conversation];
         
         [_tableview reloadData];
+        
+        [_convoTableView reloadData];
         
         
     }

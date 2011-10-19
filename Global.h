@@ -38,6 +38,7 @@
 @property (copy) NSString *currentConversation;
 @property BOOL isLoggedIn;
 @property (retain) NSString *loggedInAs;
+@property NSInteger selectedContact;
 
 - (NSFileHandle *)readHandle;
 - (NSFileHandle *)writeHandle;

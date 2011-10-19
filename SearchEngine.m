@@ -16,7 +16,7 @@
 - (id)init {
     self = [super init];
     if (self) {
-        // Initialization code here.
+        // Initialization ca ode here.
         self.searchResults = [[NSMutableArray alloc] init];
         [self.searchResults addObject:[[NSMutableArray alloc] init]];
         [self.searchResults addObject:[[NSMutableArray alloc] init]];
@@ -29,9 +29,11 @@
 - (void) performSearch:(NSString *)searchTerm forUser:(NSString *)loggedInUser {
     
     if ([[[self searchResults] objectAtIndex:0] count] > 0) {
-    
-        [[[self searchResults] objectAtIndex:0] removeAllItems];
-        [[[self searchResults] objectAtIndex:1] removeAllItems];
+        
+       NSLog(@"%@",  [[[self searchResults] objectAtIndex:0] class]);
+            
+        [[[self searchResults] objectAtIndex:0] removeAllObjects];
+        [[[self searchResults] objectAtIndex:1] removeAllObjects];
         
     }
 

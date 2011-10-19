@@ -12,7 +12,7 @@
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn, searchEngine, loggedInAs;
+@synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn, searchEngine, loggedInAs, selectedContact;
 
 + (Global *) _settings
 {
@@ -42,6 +42,7 @@ static Global* _settings = nil;
         self.statistics = [[Statistics alloc] init];
         self.searchEngine = [[SearchEngine alloc] init];
         self.loggedInAs = @"";
+        self.selectedContact = -1;
     }
     return self;
 }

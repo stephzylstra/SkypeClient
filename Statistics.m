@@ -12,7 +12,7 @@
 #import "SkypeClientAppDelegate.h"
 
 #define ONE_DAY 86400
-#define CONVERSATION_TIME 20000
+#define CONVERSATION_TIME 25000
 
 @implementation Statistics
 
@@ -95,6 +95,8 @@
 - (NSString *) mostFrequentChats:(NSString *) loggedInAccountName {
     
     // returns skypename of contact with the most sessions
+    
+    [[((SkypeClientAppDelegate *)([[NSApplication sharedApplication] delegate])) selectContact] removeAllItems];
     
     
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[NSString stringWithFormat:@"~/Library/Application Support/SkypeClient/%@/", loggedInAccountName] stringByExpandingTildeInPath] error:NULL];
@@ -216,9 +218,6 @@
             percentage = ((double) started / (double) sessions) * 100;
         }
         
-        
-        NSLog(@"You have started %ld%% of conversations with %@", percentage, [files objectAtIndex:i]);
-        
         [percentages setValue:[NSNumber numberWithDouble:percentage] forKey:[files objectAtIndex:i]];
     }
     
@@ -283,8 +282,7 @@
 
 
 - (NSInteger) averageResponseTime:(NSString *) loggedInAccountName {
-    // average time taken for you to reply to a message
-    // should maybe consider comparing with response times from contacts
+    // average time taken for you to reply to a message (overall)
     
     NSLog(@"%@...", [[NSString stringWithFormat:@"~/Library/Application Support/SkypeClient/%@/", loggedInAccountName] stringByExpandingTildeInPath]);
     
@@ -388,7 +386,7 @@
         }
     }
     
-for (int j = 0; j < [[[self conversationSessions] objectForKey:contact] count]; j++) {
+    for (int j = 0; j < [[[self conversationSessions] objectForKey:contact] count]; j++) {
     
         NSInteger lastCompared = 0;
         

@@ -1775,7 +1775,6 @@
 											<string key="NSFrame">{{367, 13}, {62, 32}}</string>
 											<reference key="NSSuperview" ref="217816043"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView"/>
 											<int key="NSViewLayerContentsRedrawPolicy">2</int>
 											<string key="NSReuseIdentifierKey">_NS:161</string>
 											<bool key="NSEnabled">YES</bool>
@@ -2077,7 +2076,7 @@
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSSecureTextFieldCell" key="NSCell" id="158368656">
 								<int key="NSCellFlags">343014976</int>
-								<int key="NSCellFlags2">272630848</int>
+								<int key="NSCellFlags2">268436544</int>
 								<string key="NSContents"/>
 								<reference key="NSSupport" ref="797254455"/>
 								<string key="NSPlaceholderString">Password</string>
@@ -2095,10 +2094,9 @@
 						<object class="NSButton" id="121103836">
 							<reference key="NSNextResponder" ref="512534777"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{203, 51}, {75, 32}}</string>
+							<string key="NSFrame">{{188, 50}, {105, 32}}</string>
 							<reference key="NSSuperview" ref="512534777"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:161</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="1066793459">
@@ -2147,7 +2145,6 @@
 							<string key="NSFrame">{{20, 10}, {441, 254}}</string>
 							<reference key="NSSuperview" ref="770730628"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView" ref="541250634"/>
 							<string key="NSReuseIdentifierKey">_NS:461</string>
 							<object class="NSMutableArray" key="NSTabViewItems">
 								<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2341,7 +2338,7 @@
 													<object class="NSComboTableView" key="NSTableView" id="574857721">
 														<reference key="NSNextResponder"/>
 														<int key="NSvFlags">274</int>
-														<string key="NSFrameSize">{13, 84}</string>
+														<string key="NSFrameSize">{13, 0}</string>
 														<reference key="NSSuperview"/>
 														<reference key="NSWindow"/>
 														<string key="NSReuseIdentifierKey">_NS:108</string>
@@ -3877,6 +3874,22 @@
 						<reference key="destination" ref="593242595"/>
 					</object>
 					<int key="connectionID">804</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">loginButton</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="121103836"/>
+					</object>
+					<int key="connectionID">805</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">doLogin:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="268675447"/>
+					</object>
+					<int key="connectionID">806</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -6282,7 +6295,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">804</int>
+			<int key="maxID">806</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -6549,6 +6562,7 @@
 							<string>individualResponseTimeYou</string>
 							<string>loggedInImage</string>
 							<string>loggedInUsername</string>
+							<string>loginButton</string>
 							<string>loginWindow</string>
 							<string>password</string>
 							<string>selectContact</string>
@@ -6568,6 +6582,7 @@
 							<string>NSTextField</string>
 							<string>NSImageCell</string>
 							<string>NSTextField</string>
+							<string>NSButton</string>
 							<string>NSWindow</string>
 							<string>NSSecureTextField</string>
 							<string>NSComboBox</string>
@@ -6590,6 +6605,7 @@
 							<string>individualResponseTimeYou</string>
 							<string>loggedInImage</string>
 							<string>loggedInUsername</string>
+							<string>loginButton</string>
 							<string>loginWindow</string>
 							<string>password</string>
 							<string>selectContact</string>
@@ -6635,6 +6651,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">loggedInUsername</string>
 								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">loginButton</string>
+								<string key="candidateClassName">NSButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">loginWindow</string>

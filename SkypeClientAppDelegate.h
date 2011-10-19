@@ -29,6 +29,7 @@
     IBOutlet NSWindow *statsWindow;
     NSComboBox *selectContact;
     NSTextField *individualLastConversation;
+    NSButton *loginButton;
 }
 
 // for individual statistics
@@ -45,6 +46,7 @@
 @property (retain) IBOutlet NSTableView *_tableview;
 
 // logging in
+@property (assign) IBOutlet NSButton *loginButton;
 @property (assign) IBOutlet NSTextField *username;
 @property (assign) IBOutlet NSSecureTextField *password;
 

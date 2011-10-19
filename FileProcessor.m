@@ -16,8 +16,7 @@
 - (id)init {
     self = [super init];
     if (self) {
-        //[self setRootPath:[@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath]];
-        //[self setDefaultImagePath:[@"~/Library/Application Support/SkypeClient/default.jpg" stringByExpandingTildeInPath]];
+        
         self.rootPath = [@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath];
         self.defaultImagePath = [@"~/Library/Application Support/SkypeClient/default.jpg" stringByExpandingTildeInPath];
     }
@@ -63,7 +62,6 @@
     NSDateFormatter *df = [[NSDateFormatter alloc] init];
     [df setDateFormat:@"dd-MM-yyyy HH:mm"];
     
-  /*  NSString *line = [[[df stringFromDate:[NSDate date]] stringByAppendingString:@": "] stringByAppendingString:[[[[conversationLine objectAtIndex:0] objectAtIndex:0] stringByAppendingString:@": "] stringByAppendingString:[[conversationLine objectAtIndex:1] objectAtIndex:0]]]; */
     
     NSString *line = [[df stringFromDate:[NSDate date]] stringByAppendingString:@": "];
     NSString *sndr = [[conversationLine objectAtIndex:0] objectAtIndex:[[conversationLine objectAtIndex:0] count] -1];
@@ -122,14 +120,14 @@
     
     // TODO
 
-  /*NSData *sending = [[[@"lv\n" stringByAppendingString:contact] stringByAppendingString:@"\n"] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+  NSData *sending = [[[@"lv\n" stringByAppendingString:contact] stringByAppendingString:@"\n"] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending];
         
     NSString *rawData = [[NSString alloc] initWithData:[[[Global _settings] readHandle] availableData] encoding:NSUTF8StringEncoding];
     
-    return [rawData boolValue]; */
+    return [rawData boolValue]; 
     
-    return true;
+    //return true;
 }
 
 

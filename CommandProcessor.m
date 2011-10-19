@@ -107,6 +107,12 @@
     }
     
     [((SkypeClientAppDelegate *)appDelegate)._convoTableView reloadData];
+            
+    if ([[[Global _settings] onlineContacts] containsObject:[[Global _settings] currentConversation]]) {
+        NSInteger index = [[[Global _settings] onlineContacts] indexOfObject:[[Global _settings] currentConversation]];
+        NSLog(@"Index is %lu", index);
+        [((SkypeClientAppDelegate *)appDelegate)._convoTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+    }
     
 }
 

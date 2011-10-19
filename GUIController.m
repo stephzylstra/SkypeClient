@@ -47,11 +47,18 @@
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
     
     if ([[tableView identifier] isEqualToString:@"contactsPane"]) {
+                
         NSTableCellView *result;
         
         result = [tableView makeViewWithIdentifier:@"contacts" owner:self];
         result.textField.stringValue = [[[Global _settings] onlineContacts] objectAtIndex:row];        
         [result.imageView setImage:[[[Global _settings] fileProcessor] getAvatar:result.textField.stringValue]];
+        
+        if (row == [[Global _settings] selectedContact]) {
+            [result setBackgroundStyle:NSBackgroundStyleDark];
+            
+            [[tableView rowViewAtRow:row makeIfNecessary:YES] setBackgroundColor:[NSColor colorWithCalibratedRed:0.55 green:0.71 blue:0.89 alpha:1]];
+        }
         
         return result;
         
