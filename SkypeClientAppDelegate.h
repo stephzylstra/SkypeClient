@@ -14,6 +14,8 @@
     NSTableView *_convoTableView;
     NSTextField *loggedInUsername;
     NSImageCell *loggedInImage;
+    NSPanel *progressPanel;
+    NSProgressIndicator *progress;
     NSTask *runtime;
     NSTask *processor;
     //NSTableView *_tableview;
@@ -57,6 +59,9 @@
 @property (assign) IBOutlet NSTextField *loggedInUsername;
 @property (assign) IBOutlet NSImageCell *loggedInImage;
 
+// progress indicator
+@property (assign) IBOutlet NSPanel *progressPanel;
+@property (assign) IBOutlet NSProgressIndicator *progress;
 
 
 - (IBAction)test:(id)sender;
@@ -70,6 +75,7 @@
 - (IBAction)doSearch:(id)sender;
 - (void)processSearch:(NSString *)searchTerm;
 - (void)sendFileTransfer:(NSString *)filename;
+- (void) updateContactsAfterLogin:(NSTimer *)timer;
 
 
 @end

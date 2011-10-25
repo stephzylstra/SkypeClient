@@ -95,7 +95,6 @@
         } else {
             result = [tableView makeViewWithIdentifier:@"statData" owner:self];
             
-            
             if ([[Global _settings] loggedInAs] != NULL && [[Global _settings] loggedInAs] != nil) {
                 switch (row) {
                     case 0:
@@ -105,7 +104,7 @@
                                 NSLog(@"mostFrequentChats is nil");
                                 result.textField.stringValue = @"";
                             }
-                        //result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]];
+
                         break;
                         
                     case 2:
@@ -207,7 +206,6 @@
                     filePath = [filePath stringByReplacingOccurrencesOfString:@"\n" withString:@""];
                 } else {
                     filePath = [[@"~/Library/Application Support/SkypeClient/Files/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[[fileObjects objectAtIndex:0] stringByReplacingOccurrencesOfString:@"\n" withString:@""]];
-                    
                 }
                 
                 if ([[filePath pathExtension] isCaseInsensitiveLike:@"jpg"] || [[filePath pathExtension] isCaseInsensitiveLike:@"png"] || [[filePath pathExtension] isCaseInsensitiveLike:@"gif"]) {                    

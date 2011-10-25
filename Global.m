@@ -14,14 +14,10 @@ static Global* _settings = nil;
 
 @synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn, searchEngine, loggedInAs, selectedContact;
 
-+ (Global *) _settings
-{
-	@synchronized([Global class])
-	{
++ (Global *) _settings {
+	@synchronized([Global class]) {
 		if (!_settings)
 			_settings = [[self alloc] init];
-        
-        
 		return _settings;
 	}
 	return nil;
@@ -121,97 +117,3 @@ static Global* _settings = nil;
 }
 
 @end
-
-
-/*
-static NSMutableArray *listeners;
-+ (NSMutableArray *)listeners { return listeners; }
-+ (void)setListeners:(NSMutableArray *)newVar { listeners = newVar; }
-
-
-// get a reference to the write end of the pipe to the skype command processor
-+ (NSFileHandle *)writeHandle {
-    static NSFileHandle *writeHandle;
-    @synchronized(self) {
-        if (!writeHandle) {
-            writeHandle = [[[Global writePipe] fileHandleForWriting] retain];
-        }
-        return writeHandle;
-    }
-}
-
-// get a reference to the read end of the pipe to the skype command processor
-+ (NSFileHandle *)readHandle {
-    static NSFileHandle *readHandle;
-    @synchronized(self) {
-        if (!readHandle) {
-            readHandle = [[[Global readPipe] fileHandleForReading] retain];
-        }
-        return readHandle;
-    }
-}
-
-
-+ (NSPipe *)readPipe {
-    static NSPipe *readPipe;
-    
-    @synchronized(self) {
-        if (!readPipe)
-            readPipe = [NSPipe pipe];
-        return readPipe;
-    }
-}
-
-
-+ (NSPipe *)writePipe {
-    static NSPipe *writePipe;
-    
-    @synchronized(self) {
-        if (!writePipe)
-            writePipe = [NSPipe pipe];
-        return writePipe;
-    }
-}
-
-
-+ (NSMutableString *) currentConvo {
-    @synchronized(self) {
-        if (current == nil) {
-            current = [[NSString alloc] initWithFormat:@""];
-        }
-        return current;
-    }
-}
-
-+ (void) setCurrentConvo:(NSString *)newVal {
-    current = [newVal copy];
-}
-
-
-+ (IBOutlet NSTextView *) convoRecorded {
-    if (convoRecorded == nil) {
-        convoRecorded = [[NSTextView alloc] init];
-    }
-    return (IBOutlet NSTextView *) convoRecorded;
-}
-
-+ (void) flush {
-    for(int i=0; i<[listeners count]; i++) {
-        [(GUIController *)[listeners objectAtIndex:i] newDataArrived];
-    }
-}
-
-+ (void)addListener:(id)object {
-    //NSMutableArray *jojo = [[NSMutableArray alloc] init];
-    [listeners addObject:@""];
-}
-
-+ (void)removeListener:(id)object {
-    [listeners removeObject:object];
-}
-
-//IBOutlet NSTextView *convoRecorded;
-
-
-
-@end*/

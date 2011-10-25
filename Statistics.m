@@ -354,6 +354,7 @@
         totalLines += [[[[self conversationSessions] objectForKey:contact] objectAtIndex:i] numberOfLines];
         numSessions++;
     }
+    if (totalLines == 0) return 0;
     return totalLines / numSessions;
 }
 
@@ -393,7 +394,8 @@
         // iterate through contact's conversation sessions
         
         NSDate *currentLineDate;
-        NSDate *previousLineDate = [[[[self conversationSessions] objectForKey:contact] objectAtIndex:j] getDateAtLine:0];
+        NSDate *previousLineDate;
+        
         for (int k = 1; k < [[[[self conversationSessions] objectForKey:contact] objectAtIndex:j] numberOfLines]; k++) {
             
             // iterate through each line of a conversation session

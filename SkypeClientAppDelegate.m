@@ -27,13 +27,15 @@
 @synthesize _convoTableView;
 @synthesize loggedInUsername;
 @synthesize loggedInImage;
+@synthesize progressPanel;
+@synthesize progress;
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     
     // start up Skype runtime kit (needs to be running straight up)
     runtime = [[NSTask alloc] init];
-    [runtime setLaunchPath:@"/Users/stephaniezylstra/Desktop/mac-x86-skypekit-novideo_3.4.1.741_371149/bin/mac-x86/mac-x86-skypekit-novideo"];
+    [runtime setLaunchPath:[@"~/Library/Application Support/SkypeClient/runtime/mac-x86-skypekit-novideo" stringByExpandingTildeInPath]];
     [runtime launch];   
     
     // sleep to make sure it has started up
@@ -44,11 +46,11 @@
     
     // start up C++ application which handles the data
     processor = [[NSTask alloc] init];
-    [processor setLaunchPath:@"/Users/stephaniezylstra/Desktop/skypekit-sdk_sdk-3.4.1.11_342604/interfaces/skype/cpp_embedded/build/skypekitclient"];
-    NSArray *arguments;
-    arguments = [NSArray arrayWithObjects: @"-t", @"/Users/stephaniezylstra/Desktop/skypekit-sdk_sdk-3.4.1.11_342604/interfaces/skype/cpp_embedded/build/keypair.crt", nil];
-    [processor setArguments: arguments];
     
+    [processor setLaunchPath:[@"~/Library/Application Support/SkypeClient/runtime/skypekitclient" stringByExpandingTildeInPath]];
+    NSArray *arguments;
+    arguments = [NSArray arrayWithObjects: @"-t", [@"~/Library/Application Support/SkypeClient/runtime/keypair.pem" stringByExpandingTildeInPath], nil];
+    [processor setArguments: arguments];
     [processor setStandardInput:[[Global _settings] writePipe]];
     
     // set up reading from the C++ app
@@ -69,12 +71,7 @@
      [NSArray arrayWithObjects:@"ConversationTableCell", NSFilenamesPboardType, @"public.utf8-plain-text", nil] ];
     [_tableview setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
     
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statisticsSelectionUpdated:) name:NSComboBoxSelectionDidChangeNotification object:nil];
-
-    
-    NSString *urlText = [NSString stringWithString:@"http://stephaniezylstra.com/private/studio3/conv_started_graph.php?you=20&them=80"];
-    [[convStarter mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlText]]]; 
     
 }
 
@@ -110,15 +107,17 @@
     
     [individualResponseTimeThem setStringValue:[NSString stringWithFormat:@"Them: %@", [[[Global _settings] statistics] stringFromTime:[[responseTimes objectAtIndex:1] longLongValue]]]];
     
-
-    
     NSNumber *percentageYouHaveStarted = [[[[Global _settings] statistics] percentageOfChatsStarted: [[Global _settings] loggedInAs]] objectForKey:[self.selectContact objectValueOfSelectedItem]];
+    
+    
+    // graph doesn't work if one of the values is 0/100
+    if ([percentageYouHaveStarted intValue] == 100) percentageYouHaveStarted = [NSNumber numberWithInt:99];
+    if ([percentageYouHaveStarted intValue] == 0) percentageYouHaveStarted = [NSNumber numberWithInt:1];
+
     
     NSInteger percentageTheyHaveStarted = 100 - [percentageYouHaveStarted intValue];
     
     NSString *urlText = [NSString stringWithFormat:@"http://stephaniezylstra.com/private/studio3/conv_started_graph.php?you=%u&them=%u", [percentageYouHaveStarted intValue], percentageTheyHaveStarted];
-    
-    NSLog(@"URL text is %@", urlText);
     
     [[convStarter mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlText]]]; 
 }
@@ -137,7 +136,7 @@
 }
 
 - (void) processStdoutData:(NSString *)str {
-    
+        
     if ([[[Global _settings] commandProcessor] isConversation:str]) {
         
         NSString *name = [[[Global _settings] commandProcessor] getConversationName:str];
@@ -165,6 +164,12 @@
     } else if ([[[Global _settings] commandProcessor] isLoginCheck:str]) {
         [[Global _settings] setIsLoggedIn:YES];
         [self initialiseAfterLogin];
+    } else if ([[[Global _settings] commandProcessor] isInvalidLogin:str]) {
+        NSLog(@"Invalid login");
+        password.stringValue = @"";
+        [loginButton setTitle:@"Login"];
+        [loginButton setEnabled:YES];
+        [[NSAlert alertWithMessageText:@"Incorrect username/password combination" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@""] runModal];
         
     } else if ([[[Global _settings] commandProcessor] isContactListChange:str]) {
         [[[Global _settings] commandProcessor] getContacts];
@@ -177,8 +182,6 @@
         NSString *sender = [[[Global _settings] commandProcessor] getFileSender:trimmed];
         NSString *identity = [[[Global _settings] commandProcessor] getFileConversation:trimmed];
         
-        
-        /*[[[NSApplication sharedApplication] dockTile]setBadgeLabel:sender];*/
         [NSApp requestUserAttention:NSInformationalRequest];
                 
         NSArray *details = [[[Global _settings] conversationText] objectForKey:identity];
@@ -199,7 +202,6 @@
         
         [[[Global _settings] fileProcessor] writeToConversation:identity withLoggedInAccount:[loggedInUsername stringValue] conversationLine: details];
         
-        
     } else {
         NSLog(@"%@", str);
     }
@@ -209,14 +211,10 @@
     if ([[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] > 0) {
         [_tableview scrollRowToVisible:[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] - 1];
     }
+    
     [_convoTableView reloadData];
-    
     [_convoTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
-    
     [_convoTableView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleRegular];
-
-    
-    
     [statsGeneral reloadData];
 
     
@@ -226,7 +224,6 @@
 
 - (IBAction)doLogin:(id)sender {
     
-    //[self.loginButton setStringValue:@"Logging in..."];
     [self.loginButton setTitle:@"Logging in..."];
     [self.loginButton setEnabled:NO];
     
@@ -249,106 +246,84 @@
         NSData *sending = [@"ef\n" dataUsingEncoding:NSASCIIStringEncoding
                                 allowLossyConversion:YES];
         [[[Global _settings] writeHandle] writeData:sending];
-
-        
         NSImage *userImage = [[NSImage alloc] initWithContentsOfFile:[[[@"~/Library/Application Support/SkypeClient/" stringByExpandingTildeInPath] stringByAppendingPathComponent:[loggedInUsername stringValue]] stringByAppendingPathExtension:@"jpg"]];
                 
         [loggedInImage setImage:userImage];
-        
-        
-        
         [[[Global _settings] commandProcessor] getContacts];
-        
-        //[loginWindow orderOut:self];
-        
-        
         [loginWindow close];
         [window makeKeyAndOrderFront:self];
         
+        [NSTimer scheduledTimerWithTimeInterval:15 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
+
+        [NSTimer scheduledTimerWithTimeInterval:45 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
         
-        
-        
-        //[NSApp activateIgnoringOtherApps:YES];
+        [NSTimer scheduledTimerWithTimeInterval:90 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
+
     }
+}
+
+- (void) updateContactsAfterLogin:(NSTimer *)timer {
+    NSLog(@"about to update contacts");
+    [[[Global _settings] commandProcessor] getContacts];
 }
 
 - (void) chooseConversation:(id)sender {
-    
     if (sender == _convoTableView && [_convoTableView selectedRow] < [[[Global _settings] onlineContacts] count]) {
-        
         [[Global _settings] setSelectedContact:[_convoTableView selectedRow]];
-        
         NSString *conversation = (NSString *)[[[Global _settings] onlineContacts] objectAtIndex:[_convoTableView selectedRow]];
-        
         NSString *command = [[@"cu\n" stringByAppendingString:conversation] stringByAppendingString:@"\n"];
-        
         NSData *sending = [command dataUsingEncoding:NSASCIIStringEncoding
                                 allowLossyConversion:YES];
         [[[Global _settings] writeHandle] writeData:sending];
-        
         [[Global _settings] setCurrentConversation:conversation];
-        
         [_tableview reloadData];
-        
         [_convoTableView reloadData];
-        
-        
     }
-    
 }
 
 - (IBAction)test:(id)sender {
-        
     [NSThread detachNewThreadSelector:@selector(bgThread:) toTarget:self withObject:nil];
-        
 }
 
 - (void)bgThread:(NSConnection *)connection {
-        
-    [statsGeneral setEnabled:NO];
     
+    [progressPanel makeKeyAndOrderFront:self];
+    [progress startAnimation:nil];
+    [statsGeneral setEnabled:NO];
     [statsGeneral reloadData];
-
     [statsWindow makeKeyAndOrderFront:self];
+    [self performSelectorOnMainThread:@selector(statsUpdated:) withObject:[NSThread currentThread] waitUntilDone:YES];
     
 }
 
 - (void)sendFileTransfer:(NSString *)filename {
-    
     NSString *entered = [NSString stringWithFormat:@"fs\n%@\n", [filename stringByStandardizingPath]];
     NSData  *sending = [entered dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     [[[Global _settings] writeHandle] writeData:sending]; 
-
     [self performSelectorOnMainThread:@selector(bgThreadIsDone:) withObject:[NSThread currentThread] waitUntilDone:YES];
 }
 
 - (void)bgThreadIsDone:(id)obj {
-    
-    /*if (obj != nil) {
-        NSLog(@"BG thread %@ finished", obj);
-    }
-    else {
-        NSLog(@"BG thread finished");
 
-    }*/
 }
 
+- (void)statsUpdated:(id)obj {
+    NSLog(@"Done!");
+    [progress stopAnimation:nil];
+    [progressPanel close];
+}
+
+
+
 - (void)processSearch:(NSString *)searchTerm {
-    NSLog(@"Processing search");
-    
-    [[[Global _settings] searchEngine] performSearch:searchTerm forUser:[loggedInUsername stringValue]];
-     
+     [[[Global _settings] searchEngine] performSearch:searchTerm forUser:[loggedInUsername stringValue]];
      [[[Global _settings] conversationText] setValue:[[[Global _settings] searchEngine] searchResults] forKey:@"search"];
-     
      [[Global _settings] setCurrentConversation:@"search"];
-     
      [_tableview reloadData];
         
 }
 
 - (IBAction)doSearch:(id)sender {
-    
-    NSLog(@"Searching for %@", [sender stringValue]);
     if (![[sender stringValue] isEqualToString:@""]) {
         [NSThread detachNewThreadSelector:@selector(processSearch:) toTarget:self withObject:[sender stringValue]];
 

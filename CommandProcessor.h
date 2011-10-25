@@ -34,6 +34,9 @@
 // check whether the line is a login check
 - (BOOL) isLoginCheck:(NSString *) line;
 
+// check whether the line is a notification the login attempt was unsuccessful
+- (BOOL) isInvalidLogin:(NSString *) line;
+
 // check whether the line shows a change in a contact's online status
 - (BOOL) isContactListChange:(NSString *) line;
 

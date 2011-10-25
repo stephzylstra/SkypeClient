@@ -35,6 +35,10 @@
     return [line hasPrefix:@"SKYPE.LOGGEDIN"];
 }
 
+- (BOOL) isInvalidLogin:(NSString *) line {
+    return [line hasPrefix:@"SKYPE.LOGGEDOUT"];
+}
+
 - (BOOL) isContactListChange:(NSString *) line {
     return [line hasPrefix:@"SKYPE.CONTACTLIST"];
 }
@@ -85,6 +89,8 @@
 
 
 - (void) getContacts {
+    
+    NSLog(@"getting contacts");
         
     NSApplication *appDelegate = [[NSApplication sharedApplication] delegate]; // will need to cast each time
     NSData *sending = [@"lg\n4\n" dataUsingEncoding:NSASCIIStringEncoding
