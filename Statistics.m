@@ -6,6 +6,9 @@
 //  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
 
+#import "Global.h"
+#import "Session.h"
+#import "SkypeClientAppDelegate.h"
 #import "Statistics.h"
 
 #define ONE_DAY 86400

@@ -8,10 +8,6 @@
 
 // Handles statistics processing
 
-#import "Global.h"
-#import "Session.h"
-#import "SkypeClientAppDelegate.h"
-
 
 @interface Statistics : NSObject
 
