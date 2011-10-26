@@ -39,6 +39,7 @@
 @property BOOL isLoggedIn;
 @property (retain) NSString *loggedInAs;
 @property NSInteger selectedContact;
+@property (retain) NSMutableDictionary *contactsAvatars;
 
 - (NSFileHandle *)readHandle;
 - (NSFileHandle *)writeHandle;

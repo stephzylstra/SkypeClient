@@ -29,9 +29,7 @@
 - (void) performSearch:(NSString *)searchTerm forUser:(NSString *)loggedInUser {
     
     if ([[[self searchResults] objectAtIndex:0] count] > 0) {
-        
-       NSLog(@"%@",  [[[self searchResults] objectAtIndex:0] class]);
-            
+                    
         [[[self searchResults] objectAtIndex:0] removeAllObjects];
         [[[self searchResults] objectAtIndex:1] removeAllObjects];
         

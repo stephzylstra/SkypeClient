@@ -18,7 +18,7 @@
 - (void) writeToConversation:(NSString *)conversation withLoggedInAccount:(NSString *)loggedInAccount conversationLine: (NSArray *) conversationLine;
 - (NSArray *) getConversation: (NSString *) conversation: (NSString *) loggedInAccount;
 - (NSImage *) getAvatar: (NSString *) contact;
-- (BOOL) hasAvatar: (NSString *) contact;
+- (void) startAvatarCheck: (NSString *) contact;
 - (NSString *) filePath: (NSString *)conversation: (NSString *)loggedInAccount;
 - (NSString *) imagePath: (NSString *)loggedInAccount;
 - (void) testing123;

@@ -284,9 +284,6 @@
 - (NSInteger) averageResponseTime:(NSString *) loggedInAccountName {
     // average time taken for you to reply to a message (overall)
     
-    NSLog(@"%@...", [[NSString stringWithFormat:@"~/Library/Application Support/SkypeClient/%@/", loggedInAccountName] stringByExpandingTildeInPath]);
-    
-    
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[NSString stringWithFormat:@"~/Library/Application Support/SkypeClient/%@/", loggedInAccountName] stringByExpandingTildeInPath] error:NULL];
     
     unsigned long totalResponseTime = 0;
@@ -434,9 +431,7 @@
     NSNumber *averageYou = (totalResponseTimeYou != 0 && numLinesYou != 0) ? [NSNumber numberWithLongLong:((long long) totalResponseTimeYou / numLinesYou)] : [NSNumber numberWithInt:0];
     
     NSNumber *averageThem = (totalResponseTimeThem != 0 && numLinesThem != 0) ? [NSNumber numberWithLongLong:((long long) totalResponseTimeThem / numLinesThem)] : [NSNumber numberWithInt:0];
-    
-    NSLog(@"Your response time is %lld and theirs is %lld", [averageYou longLongValue], [averageThem longLongValue]);
-    
+        
     NSArray *averages = [NSArray arrayWithObjects:averageYou, averageThem, nil];
     return averages;
 

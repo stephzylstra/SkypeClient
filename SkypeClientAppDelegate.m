@@ -88,7 +88,6 @@
 }
 
 - (void)statisticsSelectionUpdated:(NSNotification *)notification {
-    NSLog(@"%@", [self.selectContact objectValueOfSelectedItem]);
     
     NSDateFormatter *df = [[NSDateFormatter alloc] init];
     [df setDoesRelativeDateFormatting:YES];
@@ -108,7 +107,6 @@
     [individualResponseTimeThem setStringValue:[NSString stringWithFormat:@"Them: %@", [[[Global _settings] statistics] stringFromTime:[[responseTimes objectAtIndex:1] longLongValue]]]];
     
     NSNumber *percentageYouHaveStarted = [[[[Global _settings] statistics] percentageOfChatsStarted: [[Global _settings] loggedInAs]] objectForKey:[self.selectContact objectValueOfSelectedItem]];
-    
     
     // graph doesn't work if one of the values is 0/100
     if ([percentageYouHaveStarted intValue] == 100) percentageYouHaveStarted = [NSNumber numberWithInt:99];
@@ -165,14 +163,30 @@
         [[Global _settings] setIsLoggedIn:YES];
         [self initialiseAfterLogin];
     } else if ([[[Global _settings] commandProcessor] isInvalidLogin:str]) {
-        NSLog(@"Invalid login");
         password.stringValue = @"";
         [loginButton setTitle:@"Login"];
         [loginButton setEnabled:YES];
         [[NSAlert alertWithMessageText:@"Incorrect username/password combination" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@""] runModal];
         
+    } else if ([[[Global _settings] commandProcessor] isContactList:str]) {
+        
+        [NSThread detachNewThreadSelector:@selector(populateContacts:) toTarget:[[Global _settings] commandProcessor] withObject:str];
+        
+        [_convoTableView reloadData];
+        [_convoTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+        [_convoTableView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleRegular];
+        
+        //[[[Global _settings] commandProcessor] populateContacts:str];
+        
     } else if ([[[Global _settings] commandProcessor] isContactListChange:str]) {
         [[[Global _settings] commandProcessor] getContacts];
+        
+        [_convoTableView reloadData];
+        [_convoTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
+        [_convoTableView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleRegular];
+        
+    } else if ([[[Global _settings] commandProcessor] isAvatarCheck:str]) {
+        [[[Global _settings] commandProcessor] contactHasAvatar:str];
         
     } else if ([[[Global _settings] commandProcessor] isFileTransfer:str]) {
         
@@ -212,9 +226,7 @@
         [_tableview scrollRowToVisible:[[(NSArray *)[[[Global _settings] conversationText] objectForKey:[[Global _settings] currentConversation]] objectAtIndex:0] count] - 1];
     }
     
-    [_convoTableView reloadData];
-    [_convoTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
-    [_convoTableView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleRegular];
+
     [statsGeneral reloadData];
 
     
@@ -254,16 +266,14 @@
         [window makeKeyAndOrderFront:self];
         
         [NSTimer scheduledTimerWithTimeInterval:15 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
-
-        [NSTimer scheduledTimerWithTimeInterval:45 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
-        
-        [NSTimer scheduledTimerWithTimeInterval:90 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
+        [NSTimer scheduledTimerWithTimeInterval:30 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
+        [NSTimer scheduledTimerWithTimeInterval:60 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
+        [NSTimer scheduledTimerWithTimeInterval:100 target:self selector:@selector(updateContactsAfterLogin:) userInfo:nil repeats:NO];
 
     }
 }
 
 - (void) updateContactsAfterLogin:(NSTimer *)timer {
-    NSLog(@"about to update contacts");
     [[[Global _settings] commandProcessor] getContacts];
 }
 
@@ -304,11 +314,11 @@
 }
 
 - (void)bgThreadIsDone:(id)obj {
-
+    
 }
 
+
 - (void)statsUpdated:(id)obj {
-    NSLog(@"Done!");
     [progress stopAnimation:nil];
     [progressPanel close];
 }

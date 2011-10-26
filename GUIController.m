@@ -101,7 +101,6 @@
                         if ([[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]] != nil) {
                             result.textField.stringValue = [[[Global _settings] statistics] mostFrequentChats:[[Global _settings] loggedInAs]];
                             } else {
-                                NSLog(@"mostFrequentChats is nil");
                                 result.textField.stringValue = @"";
                             }
 
@@ -111,7 +110,6 @@
                         if ([NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfLines:[[Global _settings] loggedInAs]]] != nil) {
                         result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageNumberOfLines:[[Global _settings] loggedInAs]]];
                         } else {
-                            NSLog(@"averageNumberOfLines is nil");
                             result.textField.stringValue = @"";
                         }
                         break;
@@ -120,7 +118,6 @@
                         if ([[[Global _settings] statistics] averageResponseTime:[[Global _settings] loggedInAs]] != 0) {
                         result.textField.stringValue = [NSString stringWithFormat:@"%ld", [[[Global _settings] statistics] averageResponseTime:[[Global _settings] loggedInAs]]];
                 } else {
-                    NSLog(@"averageResponseTime is nil");
                     result.textField.stringValue = @"";
                 }
                         break;

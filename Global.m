@@ -12,7 +12,7 @@
 
 static Global* _settings = nil;
 
-@synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn, searchEngine, loggedInAs, selectedContact;
+@synthesize listeners,readPipe,writePipe, commandProcessor, statistics, fileProcessor, sentCount, onlineContacts, conversationText, currentConversation, isLoggedIn, searchEngine, loggedInAs, selectedContact, contactsAvatars;
 
 + (Global *) _settings {
 	@synchronized([Global class]) {
@@ -39,6 +39,7 @@ static Global* _settings = nil;
         self.searchEngine = [[SearchEngine alloc] init];
         self.loggedInAs = @"";
         self.selectedContact = -1;
+        self.contactsAvatars = [[NSMutableDictionary alloc] init];
     }
     return self;
 }

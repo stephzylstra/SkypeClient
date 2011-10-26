@@ -47,6 +47,10 @@
     return [line hasPrefix:@"FILE: "];
 }
 
+- (BOOL) isContactList: (NSString *)text {
+    return [text hasPrefix:@"SKYPE.ONLINECONTACTS"];
+}
+
 - (NSString *) getFileConversation:(NSString *)line {
         return [[[[[Global _settings] commandProcessor] splitLineAtSeparator:line] objectAtIndex:1] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
 }
@@ -84,25 +88,18 @@
     message = [[[[Global _settings] commandProcessor] splitLineAtSeparator:message] objectAtIndex:2];
     message = [message stringByReplacingOccurrencesOfString:@"&apos;" withString:@"'"];
     message = [message stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+    if ([[self getConversationSender:line] isEqualToString:[[Global _settings] loggedInAs]]) {
+        message = [[[Global _settings] commandProcessor] addEmoticonSupportToLine:message];        
+    }
     return message;
 }
 
 
-- (void) getContacts {
+- (void) populateContacts:(NSString *)text {
     
-    NSLog(@"getting contacts");
-        
-    NSApplication *appDelegate = [[NSApplication sharedApplication] delegate]; // will need to cast each time
-    NSData *sending = [@"lg\n4\n" dataUsingEncoding:NSASCIIStringEncoding
-                    allowLossyConversion:YES];
-    [[[Global _settings] writeHandle] writeData:sending];
-    
-    NSString *rawData = [[NSString alloc] initWithData:[[[Global _settings] readHandle] availableData] encoding:NSUTF8StringEncoding];
-        
-    NSArray *contacts = [rawData componentsSeparatedByString:@"\n"];
-    
+    NSArray *contacts = [text componentsSeparatedByString:@"\n"];
     [[[Global _settings] onlineContacts] removeAllObjects];
-
+    
     for (int i = 0; i < [contacts count]; i++) {
         if ([[contacts objectAtIndex:i] hasPrefix:@"SKYPE.Contact"]) {
             
@@ -112,14 +109,38 @@
         }
     }
     
+    
+    NSApplication *appDelegate = [[NSApplication sharedApplication] delegate]; // will need to cast each time
+
     [((SkypeClientAppDelegate *)appDelegate)._convoTableView reloadData];
-            
+    
     if ([[[Global _settings] onlineContacts] containsObject:[[Global _settings] currentConversation]]) {
         NSInteger index = [[[Global _settings] onlineContacts] indexOfObject:[[Global _settings] currentConversation]];
-        NSLog(@"Index is %lu", index);
         [((SkypeClientAppDelegate *)appDelegate)._convoTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:NO];
     }
+
+}
+
+- (BOOL) isAvatarCheck:(NSString *) str {
+    return [str hasPrefix:@"SKYPE.AVATAR"];
+}
+
+- (void) contactHasAvatar:(NSString *) text {
     
+    NSString *trimmed = [[text stringByReplacingOccurrencesOfString:@"SKYPE.AVATAR:" withString:@""] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+    NSArray *components = [trimmed componentsSeparatedByString:@":"];
+    
+    NSNumber *boolValue = [NSNumber numberWithBool:[[components objectAtIndex:1] boolValue]];
+    
+    [[[Global _settings] contactsAvatars] setObject:boolValue forKey:[components objectAtIndex:0]];
+    
+}
+
+- (void) getContacts {
+        
+    NSData *sending = [@"lg\n" dataUsingEncoding:NSASCIIStringEncoding
+                    allowLossyConversion:YES];
+    [[[Global _settings] writeHandle] writeData:sending];
 }
 
 - (void) getEmoticonRangeFromLine:(NSString *)line usingRange:(NSRangePointer)range {
@@ -135,6 +156,19 @@
         range->location = NSNotFound;
         range->length = 0;
     }
+}
+
+- (NSString *) addEmoticonSupportToLine:(NSString*)line {
+    
+    NSLog(@"%@", line);
+    
+    NSArray *emoticons = [NSArray arrayWithObjects:@":)", @":-)", @":(", @":-(", @":D", @":O", @":P", @":-P", @";)", @";-)", @";(", @";-(", nil];
+    NSArray *names = [NSArray arrayWithObjects:@"smile", @"smile", @"sadsmile", @"sadsmile", @"bigsmile", @"surprised", @"tongueout", @"tongueout", @"wink", @"wink", @"crying", @"crying", nil];
+    for (int i = 0; i < [emoticons count]; i++) {
+        NSString *replacement = [NSString stringWithFormat:@"<ss type=\"%@\">%@</ss>", [names objectAtIndex:i], [emoticons objectAtIndex:i]];
+        line = [line stringByReplacingOccurrencesOfString:[emoticons objectAtIndex:i] withString:replacement];
+    }
+    return line;
 }
 
 
