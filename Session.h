@@ -3,10 +3,14 @@
 //  SkypeClient
 //
 //  Created by Stephanie Zylstra on 3/09/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
 
 
+
+// Session class stores conversation details, grouped by conversation
+// name. Each session consists of conversation messages that appear to be
+// a single conversation session.
 
 @interface Session : NSObject {
     

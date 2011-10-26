@@ -3,7 +3,7 @@
 //  SkypeClient
 //
 //  Created by Stephanie Zylstra on 13/09/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
 
 #import "ConversationTableCell.h"
@@ -18,10 +18,9 @@
     self = [super init];
     if (self) {
         [_imageButton setImagePosition:NSImageOnly];
-        NSArray *draggedTypeArray = [NSArray arrayWithObjects:NSFilenamesPboardType, nil];
+        NSArray *draggedTypeArray = [NSArray arrayWithObjects:
+                                     NSFilenamesPboardType, nil];
         [self registerForDraggedTypes:draggedTypeArray];
-
-        // Initialization code here.
     }
     
     return self;

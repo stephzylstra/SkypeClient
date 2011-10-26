@@ -3,7 +3,7 @@
 //  SkypeClient
 //
 //  Created by Stephanie Zylstra on 3/09/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
 
 #import "Session.h"

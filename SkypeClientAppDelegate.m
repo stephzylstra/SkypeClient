@@ -3,15 +3,16 @@
 //  SkypeClient
 //
 //  Created by Stephanie Zylstra on 4/08/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
 
 #import "SkypeClientAppDelegate.h"
 #import "Global.h"
-#import <unistd.h>
+#include <unistd.h>
 
 
 @implementation SkypeClientAppDelegate
+
 @synthesize selectContact;
 @synthesize individualLastConversation;
 @synthesize statsGeneral;
@@ -126,7 +127,6 @@
     [lock lock];
     NSString *str = [[NSString alloc] initWithData:[handle availableData] encoding:NSUTF8StringEncoding];
     [handle waitForDataInBackgroundAndNotify];
-    [[Global _settings] messageListeners];
     [lock unlock];
     
     [self performSelectorOnMainThread:@selector(processStdoutData:) withObject:str waitUntilDone:NO];

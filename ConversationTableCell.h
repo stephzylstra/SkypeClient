@@ -3,8 +3,10 @@
 //  SkypeClient
 //
 //  Created by Stephanie Zylstra on 13/09/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
+
+// Subclass of NSTableviewCell
 
 #import <AppKit/AppKit.h>
 #define TEXT_MODE 1

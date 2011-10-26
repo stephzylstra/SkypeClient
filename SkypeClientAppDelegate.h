@@ -1,10 +1,12 @@
 //
-//  IDontKnowWhatImDoingAppDelegate.h
-//  IDontKnowWhatImDoing
+//  SkypeClientAppDelegate.h
+//  SkypeClient
 //
 //  Created by Stephanie Zylstra on 4/08/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 StephanieZylstra. All rights reserved.
 //
+
+// Application Delegate
 
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>

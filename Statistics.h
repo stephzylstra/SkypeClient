@@ -3,12 +3,20 @@
 //  SkypeClient
 //
 //  Created by Stephanie Zylstra on 3/09/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
 
+// Handles statistics processing
+
+#import "Global.h"
+#import "Session.h"
+#import "SkypeClientAppDelegate.h"
 
 
 @interface Statistics : NSObject
+
+@property (retain) NSMutableDictionary *conversationSessions;
+@property (copy) NSString *loggedIn;
 
 // will find actual convo based on conversation parameter and convert that into a list of sessions
 - (NSArray *) sessionsForContact:(NSString *)contact: (NSString *)loggedInAccountName;
@@ -39,9 +47,5 @@
 
 // helper method for returning human-readable times
 - (NSString *) stringFromTime:(double)time;
-
-
-@property (retain) NSMutableDictionary *conversationSessions;
-@property (copy) NSString *loggedIn;
 
 @end

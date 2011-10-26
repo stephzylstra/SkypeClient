@@ -1,10 +1,12 @@
 //
 //  Controller.h
-//  IDontKnowWhatImDoing
+//  SkypeClient
 //
 //  Created by Stephanie Zylstra on 4/08/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
+
+// Tableview Delegate class
 
 #import <Foundation/Foundation.h>
 #import "ContentViewController.h"
@@ -17,7 +19,6 @@
     IBOutlet NSTextField *text;
     IBOutlet NSScrollView *conversation;
     IBOutlet NSTextView *convoRecorded;
-    //NSString *currentConvo;
     NSMutableArray *convoData;
     NSTableView *generalStats;
     ContentViewController *viewController;
@@ -26,15 +27,18 @@
 @property (assign) IBOutlet NSTableView *generalStats;
 @property (nonatomic, retain) INPopoverController *popoverController;
 
-
+// load popover view for inline display of images
 - (IBAction)loadPopover:(id)sender;
+
+// send a chat message to the currently selected conversation
 - (IBAction)sendChatMessage:(id)sender;
-- (void)dataUpdated;
 
+// find number of rows to display in a table - Table delegate method
+- (int)numberOfRowsInTableView:(NSTableView *)tableView;
 
-
-//@property (readwrite, copy) NSMutableArray *convoData;
-
-//@property (assign) NSString *currentConvo;
+// get content for given cell - Table delegate method
+- (NSView *)tableView:(NSTableView *)tableView
+   viewForTableColumn:(NSTableColumn *)tableColumn
+                  row:(NSInteger)row;
 
 @end

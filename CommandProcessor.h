@@ -3,9 +3,11 @@
 //  SkypeClient
 //
 //  Created by Stephanie Zylstra on 17/08/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Stephanie Zylstra. All rights reserved.
 //
 
+
+// Processes commands/data received from the Skype backend.
 
 
 @interface CommandProcessor : NSObject
@@ -57,7 +59,8 @@
 - (NSString *) getFileConversation:(NSString *)line;
 
 // get first range containing emoticon syntax
-- (void) getEmoticonRangeFromLine:(NSString *)line usingRange:(NSRangePointer)range;
+- (void) getEmoticonRangeFromLine:(NSString *)line
+                       usingRange:(NSRangePointer)range;
 
 // determine whether a call needs to be made to the Skype servers to fetch an avatar
 - (BOOL) isAvatarCheck:(NSString *) str;
